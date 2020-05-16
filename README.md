@@ -11,7 +11,7 @@ The business logic are written by lua.
 | ----|------|
 [![Build status](https:img.shields.io/badge/build-pass-green.svg)]()|[![Build Status](https:img.shields.io/badge/porting-progressing-red.svg)]()
 
-![image](http://github.com/flwmxd/pharaohstory/raw/master/img/main-screen.png)
+![image](https://raw.githubusercontent.com/flwmxd/PharaohStroy/master/img/main-screen.png)
 
 
 # Usage 
@@ -19,14 +19,13 @@ The business logic are written by lua.
 The editor contains a MapleStory-FileSystem-Browser, so you can use it find a resource and add it into game scene
 
 
-http://github.com/flwmxd/pharaohstory/raw/master/img
 
-![image](http://github.com/flwmxd/pharaohstory/raw/master/img/add-sprite.gif)
+![image](https://raw.githubusercontent.com/flwmxd/PharaohStroy/master/img/add-sprite.gif)
 
 
 Beside, it support script-binding like Unity. so you can drag your own script to some specific GameObject 
 
-![image](http://github.com/flwmxd/pharaohstory/raw/master/img/drag-script.gif)
+![image](https://raw.githubusercontent.com/flwmxd/PharaohStroy/master/img/drag-script.gif)
 
 ### Others
 
@@ -67,18 +66,18 @@ this engine include two parts, one is the lua which is used to write core busine
 
 in the native framework, it support the basic engine function such as Audio,Graphics,etc
 
-![image](http://github.com/flwmxd/pharaohstory/raw/master/img/Architecture.png)
+![image](https://raw.githubusercontent.com/flwmxd/PharaohStroy/master/img/Architecture.png)
 
 ## Engine Architecture 
 
 in lua framework, it include all upper engine components (GameObject,Scene,Sprite,Other UI components)
 
 
-![image](http://github.com/flwmxd/pharaohstory/raw/master/img/lua-framework.png)
+![image](https://raw.githubusercontent.com/flwmxd/PharaohStroy/master/img/lua-framework.png)
 
 ## Processing Graph
 
-![image](http://github.com/flwmxd/pharaohstory/raw/master/img/processing.png)
+![image](https://raw.githubusercontent.com/flwmxd/PharaohStroy/master/img/processing.png)
 
 
 # Some Concepts
@@ -92,7 +91,7 @@ GameObject is a container and basic updatable, drawable, transformable, eventabl
 ## Sprite
 Sprite is a 2d graphic object which can change its color, transform(scale rotation postion,etc)
 
-![image](http://github.com/flwmxd/pharaohstory/raw/master/img/sprite.png)
+![image](https://raw.githubusercontent.com/flwmxd/PharaohStroy/master/img/sprite.png)
 
 
 ## Scene
@@ -108,7 +107,7 @@ The **Button** implements the original maplestory button logic, so you can add b
 
 The **TextView** implements the maplestory **Rich-Text** in native.
 
-![image](http://github.com/flwmxd/pharaohstory/raw/master/img/text.gif)
+![image](https://raw.githubusercontent.com/flwmxd/PharaohStroy/master/img/text.gif)
 
 
 
