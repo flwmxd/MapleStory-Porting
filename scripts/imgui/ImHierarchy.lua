@@ -110,7 +110,12 @@ function ImHierarchy.gameObjectClick(parent,obj,nodeName)
 	if imgui.BeginPopupContextItem(nodeName) then 
 		
 		if imgui.MenuItem("GameObject") then
-			obj:addChild(GameObject.new(Vector.new(50,50),Vector.new(50,50)))
+			local child = obj:addChild(GameObject.new(Vector.new(50,50),Vector.new(50,50)))
+			child.showRect = true
+			if Engine.editorFocusedObject ~= nil then
+				Engine.editorFocusedObject.showRect = false
+			end
+			Engine.editorFocusedObject = child
 		end
 	
 		if imgui.MenuItem("Delete") then
@@ -124,11 +129,26 @@ function ImHierarchy.gameObjectClick(parent,obj,nodeName)
 		imgui.Separator();
 		if imgui.BeginMenu("UI") then
 			if imgui.MenuItem("TextView") then
-
+				local child = obj:addChild(TextView.new(
+					Vector.new(50,50),Vector.new(0,0),text.LEFT,text.BLACK,text.A11M,"Sample Text"
+				))
+				child.showRect = true
+				if Engine.editorFocusedObject ~= nil then
+					Engine.editorFocusedObject.showRect = false
+				end
+				Engine.editorFocusedObject = child
 			end
 			imgui.Separator();
 			if imgui.MenuItem("EditText") then
-
+				local child = obj:addChild(EditText.new(
+					Vector.new(300,400),Vector.new(100,50),"Sample Input"
+				))
+				
+				child.showRect = true
+				if Engine.editorFocusedObject ~= nil then
+					Engine.editorFocusedObject.showRect = false
+				end
+				Engine.editorFocusedObject = child
 			end
 			imgui.EndMenu();
 		end
@@ -157,22 +177,25 @@ function ImHierarchy.listSubItems(parent,subNode)
 
 		if #v.gameObjs > 0 then
 			if imgui.TreeNode(nodeName) then
+				ImHierarchy.focusItem(v)
 				ImHierarchy.dragReorder(v,true)
+				ImHierarchy.gameObjectClick(parent,v,nodeName)
 				ImHierarchy.listSubItems(v,v.gameObjs)
+			
 				imgui.TreePop()
 			else
-				ImHierarchy.dragReorder(v,false)
+				ImHierarchy.dragReorder(v,true)
 			end
+		
 		else
-			imgui.Selectable(nodeName)
+			if imgui.Selectable(nodeName) then 
+				Engine.editorFocusedObject = v
+			end
+			
+			ImHierarchy.gameObjectClick(parent,v,nodeName)
 			ImHierarchy.dragReorder(v,false)
 		end
 
-		ImHierarchy.gameObjectClick(parent,v,nodeName)
-		ImHierarchy.focusItem(v)
-		if(imgui.IsItemHovered())then 
-			v:highlight()
-		end
 		imgui.PopID()
 	end
 end
