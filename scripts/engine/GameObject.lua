@@ -83,12 +83,17 @@ end
 ---
 ---Init GameObejct and set its binded scripts at runtime
 function GameObject:init()
+
+    if self.gameObjs == nil then
+        self.gameObjs = {}
+    end
+
     if self.bindScripts == nil then
         self.bindScripts = {}
     end
 
     for k,v in pairs(self.bindScripts) do
-        if #v == 0 then
+        if #v == 0 and not system_editor_mode then
             local table = package.loaded[k] or require(k)
             local script = table.new()
             script.name = k
@@ -189,6 +194,7 @@ function GameObject:calculateLocalTransform()
 end
 
 function GameObject:calcluateTransform()
+    --log("calcluateTransform")
     self.transform = self.parentMatrix * self:calculateLocalTransform()
     self.transformDirty = false
     self.updateChildrenTransform = true
@@ -207,7 +213,7 @@ end
 ---@param parentTransform transforms in parent
 ---@param parentDirty  if parent has expirence a transform, the chilld would recalculate
 function GameObject:visit(drawQueue,camera,parentTransform, parentDirty)
-
+  
     if(parentDirty) then 
         self:updateTransform(parentTransform)
     end
@@ -216,14 +222,17 @@ function GameObject:visit(drawQueue,camera,parentTransform, parentDirty)
         self:calcluateTransform()
     end
     
+
     if camera:checkVisibility(self) and self.active then
         table.insert(drawQueue,self)
-    end
 
-    for k,v in pairs(self.gameObjs) do
-        v:visit(drawQueue,camera,self.transform,self.updateChildrenTransform)
-    end
+        for index, v in ipairs(self.gameObjs) do
+            v:visit(drawQueue,camera,self.transform,self.updateChildrenTransform)
+        end
 
+    end
+   
+  
     self.updateChildrenTransform = false
 end
 
@@ -286,15 +295,19 @@ function GameObject:draw(camera)
 end
 
 function GameObject:update(dt)
+   
     for i,v in ipairs(self.gameObjs) do
         if v.active then
             v:update(dt)
         end
     end
 
-    if self.bindScripts ~= nil then
-        for i,v in pairs(self.bindScripts) do
-            v:update(dt)
+
+    if not system_editor_mode then
+        if self.bindScripts ~= nil then
+            for i,v in pairs(self.bindScripts) do
+                v:update(dt)
+            end
         end
     end
 
@@ -323,6 +336,8 @@ end
 
 
 function GameObject:onTouchEvent(x,y,touchId,type)
+    
+  
     local click = function(obj,x,y,touchId,type)
         if(type == event.TOUCH_CLICK) then
             return obj:onPress(x,y,touchId,type)
@@ -339,15 +354,18 @@ function GameObject:onTouchEvent(x,y,touchId,type)
             self.pressed = true
             self.lastPositon = Vector.new(x,y)
             self.touchId = touchId
-            return click(self,x,y,touchId,type)
-
+            if not system_editor_mode then 
+                return click(self,x,y,touchId,type)
+            end
+            return true
         elseif type == event.TOUCH_RELEASE and self.pressed then
             self.pressed = false
             self.lastPositon = Vector.new(x,y)
             self.touchId = -1
-
-            return click(self,x,y,touchId,type)
-
+            if not system_editor_mode then 
+                return click(self,x,y,touchId,type)
+            end
+            return true
         else
             if self.pressed	== true and self.touchId == touchId then
                 local currPos = Vector.new(x,y)
@@ -358,29 +376,34 @@ function GameObject:onTouchEvent(x,y,touchId,type)
             end
         end
     end
-
-
-    if(self:bounds():contains(Vector.new(x,y))) then 
-        for i = #self.gameObjs, 1, -1 do
-            local v = self.gameObjs[i]
-            if v.active and v.enable then
-                if v:onTouchEvent(x,y,touchId,type) then
-                    return true
+    
+   
+        if(self:bounds():contains(Vector.new(x,y))) then 
+            for i = #self.gameObjs, 1, -1 do
+                local v = self.gameObjs[i]
+                if v.active and v.enable then
+                    if v:onTouchEvent(x,y,touchId,type) then
+                        return true
+                    end
                 end
             end
-        end
 
-        return click(self,x,y,touchId,type)
+            if not system_editor_mode then 
+                return click(self,x,y,touchId,type)
+            end
+            return false
 
-    elseif(self.touchId == touchId) then 
-            -- which means the view still contains the foucs
-        if type == event.TOUCH_RELEASE or type == event.TOUCH_SCROLL and self.pressed then
-            return click(self,x,y,touchId,type)
+        elseif(self.touchId == touchId) then 
+                -- which means the view still contains the foucs
+            if type == event.TOUCH_RELEASE or type == event.TOUCH_SCROLL and self.pressed then
+                if not system_editor_mode then 
+                    return click(self,x,y,touchId,type)
+                end
+                return false
+            end
+        else
+            self:onLostMouse()
         end
-    else
-        self:onLostMouse()
-    end
-    
     return false
 end
 
@@ -498,10 +521,14 @@ function GameObject:addScript(script,moduleName)
     end
 
     if self.bindScripts[moduleName] == nil then
-        script.name = moduleName
-        script.gameObject = self
-        script:onLoaded()
-        self.bindScripts[moduleName] = script
+        if not system_editor_mode  then
+            script.name = moduleName
+            script.gameObject = self
+            script:onLoaded()
+            self.bindScripts[moduleName] = script
+        else -- editor mode only save the state, not store the runtime information
+            self.bindScripts[moduleName] = {}
+        end
     end
 end
 

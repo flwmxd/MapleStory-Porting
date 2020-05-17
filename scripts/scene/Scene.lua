@@ -28,7 +28,6 @@ local Scene = class("Scene",GameObject)
 
 function Scene:ctor(pos,dimen)
 	GameObject.ctor(self,pos,dimen)
-	self:init()
 end
 
 function Scene:init()
@@ -67,7 +66,9 @@ function Scene.loadScene(sceneName)
 	local data = file:read("*a")
 	local data = Serializable.deserialize(data)
 	file:close()
-	return Scene.loadGameObject(data)
+	local scene =  Scene.loadGameObject(data)
+	scene.drag = false
+	return scene
 end
 
 function Scene.loadGameObject(table)
@@ -92,6 +93,7 @@ function Scene.loadGameObject(table)
 		end
 		if(obj.init ~= nil) then 
 			obj:init()
+			obj.drag = system_editor_mode
 		end 
 		return obj
 	end

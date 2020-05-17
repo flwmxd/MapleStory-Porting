@@ -53,7 +53,7 @@ function Camera:checkVisibility(gameObject)
         self.contentSize.y
     )
     return visibileRect:overlap(bounds)
-    --return true
+   -- return true
 end
 
 function Camera:setTarget(gameObj)

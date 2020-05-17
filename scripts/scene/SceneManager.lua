@@ -32,14 +32,9 @@ SceneManager = {
 
 SceneManager.camera = Camera.new(Vector.new(800,600))
 
-function SceneManager.draw()
-    for i,v in ipairs(SceneManager.drawQueue) do
-       v:draw(SceneManager.camera)
-    end
-    SceneManager.drawQueue = {}
-end
 
 function SceneManager.addScene(scene)
+    scene:init()
     scene:onCreate()
     SceneManager.scenes = {}
     table.insert(SceneManager.scenes,1,scene)
@@ -59,13 +54,20 @@ function SceneManager.removeScene(scene)
     end
 end
 
+function SceneManager.draw()
+    for i,v in ipairs(SceneManager.drawQueue) do
+       v:draw(SceneManager.camera)
+       SceneManager.drawQueue[i] = nil
+    end
+    --SceneManager.drawQueue = {}
+end
+
 function SceneManager.update(dt)
-    for i = #SceneManager.scenes, 1, -1 do
-        local v = SceneManager.scenes[i]
-        v:visit(SceneManager.drawQueue,SceneManager.camera,SceneManager.defaultMt,SceneManager.updateScenes)
-        if v.active then
-            v:update(dt)
-        end
+
+    local v = SceneManager.rootScene
+    v:visit(SceneManager.drawQueue,SceneManager.camera,SceneManager.defaultMt,SceneManager.updateScenes)
+    if v.active and not system_editor_mode then
+        v:update(dt)
     end
     SceneManager.updateScenes = false
 end

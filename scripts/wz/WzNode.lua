@@ -19,51 +19,74 @@
 local WzNode = {}
 
 WzNode.__index = function(table, key) 
+    
     if(type(key) == "number") then
         key = key..""
     end
+
+    if(type(key) == "table") then
+        key = key:toString()
+    end
+
     local node = table.children[key]
-    if(node ~= nil) then
-        local sub = WzNode.expand(node)
+    if type(node) == "table" then
+        return node
+    end
+
+    if(node ~= nil) then -- replace rawPtr to children table
+        local sub = WzNode.new(node,key)
         table.children[key] = sub
         return sub
     end
+
     return nil
 end
 
 function WzNode:toInt(default)
-    return wz.toInt(self.rawPtr,default)
+    return wz.toInt(self.rawPtr,default or 0)
 end
 
 function WzNode:toString(default)
-    return wz.toString(self.rawPtr,default)
+    return wz.toString(self.rawPtr,default or "")
 end
 
 function WzNode:toReal(default)
-    return wz.toReal(self.rawPtr,default)
+    return wz.toReal(self.rawPtr,default or 0)
 end
 
 function WzNode:toVector()
     return wz.toVector(self.rawPtr)
 end
 
-function WzNode.new(path)
+
+function WzNode:foreach(callback)
+    for k, v in pairs(self.children) do
+        callback(k,WzNode.new(v,k))
+    end
+end
+
+
+--@param identity is an optional arg
+function WzNode.new(path,identity)
     local instance = {}
     setmetatable(instance,WzNode)
-    if(path ~= nil) then
-        instance.children = wz.flat(path)
-    end
-    for k,v in pairs(WzNode) do
-        instance[k] = v
+    if path ~= nil then
+
+        if type(path) == "userdata" then
+            instance.children = wz.expand(path)
+            instance.rawPtr = path
+            instance.identity = identity
+        else
+            instance.children = wz.flat(path)
+        end
+
+        for k,v in pairs(WzNode) do
+            instance[k] = v
+        end
+
     end
     return instance
 end
 
-function WzNode.expand(rawPtr)
-    local node = WzNode.new()
-    node.children = wz.expand(rawPtr)
-    node.rawPtr = rawPtr
-    return node
-end
 
 return WzNode

@@ -28,12 +28,20 @@ local WzNode = require "WzNode"
 local Button = require "Button"
 local Vector = require "Vector"
 local Scene = require "Scene"
+local GameObject = require "GameObject"
 local MapleMap = require "MapleMap"
+
 local Sprite = require "Sprite"
 --the entry function called by C++ 
 function onStart()
-	--SceneManager.addScene(Scene.loadScene("./scene/SampleScene.scene"))
+	ImEngine.onStart()
 	SceneManager.addScene(MapleMap.new(910000000))
+	--local scene = SceneManager.addScene(Scene.loadScene("./scene/SampleScene.scene"))
+
+	--for i = 1, 200 do
+	--	scene:addChild(GameObject.new())
+	--end
+
 end
 
 --it deponds on your device
@@ -51,6 +59,28 @@ function onTouchEvent(x,y,touchId,type)
 	return Engine.onTouchEvent(x,y,touchId,type)
 end
 
-function onKeyEvent(keyCode,type)
-	return Engine.onKeyEvent(keyCode,type)
+-- used in editor mode
+function onAddView(name,path)
+	log(name.."...."..path)
+	local obj = nil
+	if name == "Sprite" then 
+		obj = Sprite.new(path,Vector.new(0,0))
+	elseif name == "Button" then
+		obj = Button.new(Vector.new(30,30),Vector.new(0,0),path)
+	end
+	if(obj ~= nil) then
+		obj.drag = false
+		obj.showRect = false
+		if Engine.editorFocusedObject ~= nil then
+			Engine.editorFocusedObject.drag = false
+		end
+		Engine.editorFocusedObject = obj
+		SceneManager.rootScene:addChild(obj,path)
+	end
+	return true
+end
+
+function onLoadScene(path)
+	SceneManager.addScene(Scene.loadScene(path))
+	return true
 end

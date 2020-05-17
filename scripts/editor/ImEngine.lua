@@ -17,63 +17,27 @@
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.    --
 ------------------------------------------------------------------------------
 
-require "Scheduler" 
-require "SceneManager"
-require "Timer"
--- single instance of current Game
-Engine = {
-    focusedGameObject = nil,
-    editorFocusedObject = nil,
-    elasped = 0,
-    frames = 0,
-    FPS = 0
+require ("ImHierarchy")
+require ("ImObjectEditor")
+ImEngine = {
+    components = {}
 }
 
-function Engine.draw()
-    ImEngine.draw()
-    SceneManager.draw()
-    
-    Engine.frames = Engine.frames + 1
-    if(Engine.frames >= 100) then
-        Engine.FPS = Engine.frames / Engine.elasped
-        log("FPS " .. Engine.FPS)
-        Engine.elasped = 0
-        Engine.frames = 0
+function ImEngine.onStart()
+    table.insert(ImEngine.components,ImHierarchy )
+    table.insert(ImEngine.components,ImObjectEditor)
+end
+
+function ImEngine.draw()
+   for i,v in ipairs(ImEngine.components) do
+        v.draw()
+   end
+end
+
+function ImEngine.update(dt)
+    for i,v in ipairs(ImEngine.components) do
+        v.update(dt)
     end
 end
 
-function Engine.update(dt)
-    if not system_editor_mode then
-        Timer.update(dt)
-        Scheduler.update(dt)
-        ImEngine.update(dt)
-    end
-    SceneManager.update(dt)
-    Engine.elasped = Engine.elasped + dt
-end
-
-function Engine.onTouchEvent(x,y,touchId,type)
-    return SceneManager.onTouchEvent(x,y,touchId,type)
-end
-
-function Engine.onKeyEvent(keyCode,type)
-    if(Engine.focusedGameObject ~= nil) then
-        return Engine.focusedGameObject:onKeyEvent(keyCode,type)
-    end
-    return SceneManager.onKeyEvent(keyCode,type)
-end
-
-function Engine.focusGameObject(gameObj)
-    
-    if(Engine.focusedGameObject ~= nil) then -- the prev gameObj
-        Engine.focusedGameObject.focused = false
-    end
-
-    if(gameObj ~= nil) then
-        gameObj.focused = true
-    end
-
-    Engine.focusedGameObject = gameObj
-end
-
-return Engine
+return ImEngine
