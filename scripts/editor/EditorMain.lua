@@ -33,13 +33,24 @@ local MapleMap = require "MapleMap"
 
 local Sprite = require "Sprite"
 --the entry function called by C++ 
+
+CurrentScene = nil
+
 function onStart()
 	ImEngine.onStart()
-	SceneManager.addScene(MapleMap.new(910000000))
+	CurrentScene = MapleMap.new(910000000)
+	SceneManager.addScene(CurrentScene)
 	--local scene = SceneManager.addScene(Scene.loadScene("./scene/SampleScene.scene"))
-
+	
 	--for i = 1, 200 do
-	--	scene:addChild(GameObject.new())
+		--	scene:addChild(GameObject.new())
+	--end
+	--SceneManager.addScene(MapleMap.new(910000000))
+	--local scene = SceneManager.addScene(Scene.loadScene("./scene/SampleScene.scene"))
+	--while true do
+	--	Engine.update(maple.pollEvent())
+	--	Engine.draw()
+	--	maple.present()
 	--end
 
 end
@@ -67,6 +78,9 @@ function onAddView(name,path)
 		obj = Sprite.new(path,Vector.new(0,0))
 	elseif name == "Button" then
 		obj = Button.new(Vector.new(30,30),Vector.new(0,0),path)
+	elseif name == "Map" then
+		SceneManager.removeScene(CurrentScene)
+		CurrentScene = SceneManager.addScene(MapleMap.new(tonumber(path)))
 	end
 	if(obj ~= nil) then
 		obj.drag = false

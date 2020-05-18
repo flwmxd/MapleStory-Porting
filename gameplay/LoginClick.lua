@@ -34,5 +34,8 @@ function LoginClick:onClick(btn)
     log("Button Click")
 end
 
+function LoginClick:onRelease(btn)
+    log("Button Click")
+end
 
 return LoginClick

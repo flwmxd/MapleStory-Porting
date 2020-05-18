@@ -18,11 +18,13 @@
 
 require ("Engine")
 local Vector = require ("Vector")
+local Portal = require ("Portal")
+
 ImObjectEditor = {
 	open = true,
     name = "ObjectEditor",
     value = 0,
-    
+    npcStance = ""
 }
 
 function ImObjectEditor.draw()
@@ -50,13 +52,52 @@ function ImObjectEditor.draw()
             ImObjectEditor.drawRectColor(obj)
             ImObjectEditor.drawListener(obj)
             ImObjectEditor.drawBindScript(obj)
-
-          
+            ImObjectEditor.drawNpcAnimations(obj)
+            ImObjectEditor.drawPortalAnimations(obj)
 
             --ImObjectEditor.drawChildren(obj)
         end  
 	end
     imgui.End()
+end
+
+function ImObjectEditor.drawPortalAnimations(obj)
+    if obj.__cname == "Portal" then
+
+        if imgui.Button("LookAt") then
+            SceneManager.camera:setTarget(obj)
+        end
+
+        imgui.PushID(obj.uuid .. "Animation")
+        if obj.animation ~= nil then
+            local txtId,l,r,t,b = obj.animation:getTexture()
+            imgui.Image(txtId,obj.animation:getWidth(),obj.animation:getHeight(),l,t,r,b)
+        end
+        imgui.PopID()
+    end
+end
+
+function ImObjectEditor.drawNpcAnimations(obj)
+    if obj.__cname == "Npc" then
+
+        imgui.PushID(obj.uuid .. "Animation")
+        if imgui.BeginCombo("Animation",ImObjectEditor.npcStance) then
+            for key, value in pairs(obj.stances) do
+                if imgui.Selectable(value) then  
+                    ImObjectEditor.npcStance = value
+                end
+            end
+            imgui.EndCombo()
+        end
+        imgui.PopID()
+
+        if ImObjectEditor.npcStance ~= "" then
+            local anim = obj.animations[ImObjectEditor.npcStance]
+            local txtId,l,r,t,b = anim:getTexture()
+            imgui.Image(txtId,anim:getWidth(),anim:getHeight(),l,t,r,b)
+        end
+
+    end
 end
 
 
@@ -77,7 +118,7 @@ function ImObjectEditor.drawTextProperties(obj)
     if obj.__cname == "TextView" then
         imgui.PushID(obj.uuid.." Alignment")
 
-        local  alignment = { [text.Left] = "Left", [text.Center] = "Center", [text.Right] = "Right" }
+        local  alignment = { [text.LEFT] = "Left", [text.CENTER] = "Center", [text.RIGHT] = "Right" }
 
         if imgui.BeginCombo("Alignment",alignment[obj.alignment or 0]) then
             for key, value in pairs(alignment) do
@@ -151,7 +192,6 @@ function ImObjectEditor.drawPosition(obj)
     ret,x = imgui.DragFloat("x",obj.position.x,1,0,0,"%.0f");
     ret,y = imgui.DragFloat("y",obj.position.y,1,0,0,"%.0f");
     if x ~= obj.position.x or y ~= obj.position.y then
-        log(".....")
         obj:setPosition(Vector.new(x,y))
     end
     imgui.Separator()

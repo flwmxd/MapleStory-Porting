@@ -51,20 +51,33 @@ end
 
 function Sprite:draw(camera)
     GameObject.draw(self,camera)
-    self.animation:draw(camera:getViewProjection())
+    if self.animation ~= nil then
+        self.animation:draw(camera:getViewProjection())
+    end
 end
 
 function Sprite:update(dt)
-    self.animation:update(dt)
+    if self.animation ~= nil then
+        self.animation:update(dt)
+    end
     GameObject.update(self,dt)
 end
 
 function Sprite:getOrigin()
-    return self.animation:getOrigin()
+    if self.animation == nil then return Vector.new(0,0) end return self.animation:getOrigin()
 end
 
 function Sprite:setNativeTransform()
-    self.animation:updateTransform(self.transform)
+    if self.animation ~= nil then
+        self.animation:updateTransform(self.transform)
+    end
+end
+
+function Sprite:getTexture()
+    if self.animation ~= nil then
+        return self.animation:getTexture()
+    end
+    return nil
 end
 
 return Sprite

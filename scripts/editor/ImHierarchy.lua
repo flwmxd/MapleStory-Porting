@@ -175,21 +175,27 @@ function ImHierarchy.listSubItems(parent,subNode)
 		local nodeName = string.format( "%s(%s)",v.name,v.__cname)
 		imgui.PushID(v.uuid)
 
+
+		if imgui.IsItemHovered() then
+			v:highlight()
+		end
+
 		if #v.gameObjs > 0 then
 			if imgui.TreeNode(nodeName) then
 				ImHierarchy.focusItem(v)
 				ImHierarchy.dragReorder(v,true)
 				ImHierarchy.gameObjectClick(parent,v,nodeName)
 				ImHierarchy.listSubItems(v,v.gameObjs)
-			
 				imgui.TreePop()
 			else
 				ImHierarchy.dragReorder(v,true)
 			end
 		
 		else
+			
 			if imgui.Selectable(nodeName) then 
 				Engine.editorFocusedObject = v
+				--SceneManager.camera:setTarget(v)
 			end
 			
 			ImHierarchy.gameObjectClick(parent,v,nodeName)
@@ -227,6 +233,7 @@ end
 function ImHierarchy.focusItem(v)
 	if(imgui.IsItemClicked()) then
 		Engine.editorFocusedObject = v
+		
 	end
 end
 

@@ -79,6 +79,9 @@ function TextView:setAlignment(alig)
 	self:init()
 end
 
+function TextView:setNameTag(tag)
+	self.nativeText:setNameTag(tag)
+end
 
 function TextView:setTextFont(font)
 	self.textFont = font

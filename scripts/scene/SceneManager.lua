@@ -24,7 +24,7 @@ local Vector = require("Vector")
 
 SceneManager = {
     updateScenes = true,
-    defaultMt = Matrix.identity(),
+    transform = Transform.new(),
     rootScene = nil,
     scenes = {},
     drawQueue = {}
@@ -38,7 +38,6 @@ function SceneManager.addScene(scene)
     scene:onCreate()
     SceneManager.scenes = {}
     table.insert(SceneManager.scenes,1,scene)
-    scene:updateTransform(Matrix:identity())
     SceneManager.rootScene = scene
     SceneManager.camera:setTarget(scene)
     return scene
@@ -65,7 +64,7 @@ end
 function SceneManager.update(dt)
 
     local v = SceneManager.rootScene
-    v:visit(SceneManager.drawQueue,SceneManager.camera,SceneManager.defaultMt,SceneManager.updateScenes)
+    v:visit(SceneManager.drawQueue,SceneManager.camera,SceneManager.transform,SceneManager.updateScenes)
     if v.active and not system_editor_mode then
         v:update(dt)
     end

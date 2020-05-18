@@ -30,13 +30,13 @@ end
 
 function ImEngine.draw()
    for i,v in ipairs(ImEngine.components) do
-        v.draw()
+       v.draw()
    end
 end
 
 function ImEngine.update(dt)
     for i,v in ipairs(ImEngine.components) do
-        v.update(dt)
+       v.update(dt)
     end
 end
 

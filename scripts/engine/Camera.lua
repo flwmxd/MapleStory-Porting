@@ -30,6 +30,11 @@ function Camera:ctor(contentSize)
     self.lookTarget = nil
     self.viewProjection = Matrix.identity()
     self:recalculateProjection()
+    self.visibileRect = Rect.new(
+        0,0,
+        self.contentSize.x,
+        self.contentSize.y
+    )
 end
 
 
@@ -46,27 +51,23 @@ function Camera:checkVisibility(gameObject)
     -- but in a sample 2d game, the world localtion is equal to screen location
     --
     -- the default Pos is zero (left,top in screen as the origin)
-
-    local visibileRect = Rect.new(
-        0,0,
-        self.contentSize.x,
-        self.contentSize.y
-    )
-    return visibileRect:overlap(bounds)
+    return self.visibileRect:overlap(bounds) or true
    -- return true
 end
 
 function Camera:setTarget(gameObj)
+    log("Camera:setTarget")
     self.viewProjectionDirty = true
     self.lookTarget = gameObj
 end
 
 function Camera:recalculateProjection()
-    self.projection:setOrthographic(0,800,0,600,1,-1)
+    self.projection:setOrthographic(-400,400,-300,300,1,-1)
+    --self.projection:setOrthographicFromSize(800,600, -1.0, 1.0);
 end
 
 function Camera:calculateViewProjection()
-    if self.lookTarget ~= nil then
+    if self.lookTarget ~= nil and self.lookTarget.inverseTransform ~= nil then
         self.viewProjection = self.projection * self.lookTarget.inverseTransform
     else
         self.viewProjection = self.projection * Matrix.identity()

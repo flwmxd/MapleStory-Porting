@@ -61,7 +61,11 @@ end
 
 function WzNode:foreach(callback)
     for k, v in pairs(self.children) do
-        callback(k,WzNode.new(v,k))
+        if type(v) ~= "table" then
+            callback(k,WzNode.new(v,k))
+        else
+            callback(k,v)
+        end
     end
 end
 
@@ -76,8 +80,10 @@ function WzNode.new(path,identity)
             instance.children = wz.expand(path)
             instance.rawPtr = path
             instance.identity = identity
-        else
+        elseif path ~= nil then
             instance.children = wz.flat(path)
+        else
+            instance.children = {}
         end
 
         for k,v in pairs(WzNode) do

@@ -1,4 +1,3 @@
-
 ------------------------------------------------------------------------------
 -- This file is part of the PharaohStroy MMORPG client                      --
 -- Copyright ?2020-2022 Prime Zeng                                          --
@@ -17,63 +16,22 @@
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.    --
 ------------------------------------------------------------------------------
 
-require "Scheduler" 
-require "SceneManager"
-require "Timer"
--- single instance of current Game
-Engine = {
-    focusedGameObject = nil,
-    editorFocusedObject = nil,
-    elasped = 0,
-    frames = 0,
-    FPS = 0
-}
+dofile("scripts/Tools/Class.lua")
 
-function Engine.draw()
-    ImEngine.draw()
-    SceneManager.draw()
-    
-    Engine.frames = Engine.frames + 1
-    if(Engine.frames >= 100) then
-        Engine.FPS = Engine.frames / Engine.elasped
-        log("FPS " .. Engine.FPS)
-        Engine.elasped = 0
-        Engine.frames = 0
+require ("WzFile")
+
+local Vector = require("Vector")
+local Sprite = require("Sprite")
+local Obj = class("Obj",Sprite)
+
+
+function Obj:ctor(node)
+    local pos = Vector.new(node["x"]:toInt(),  node["y"]:toInt())
+    local spNode = WzFile.map["Obj"][node["oS"]:toString() .. ".img"][node["l0"]][node["l1"]][node["l2"]]
+    if(spNode ~= nil) then
+        Sprite.ctor(self,spNode,pos)
     end
 end
 
-function Engine.update(dt)
-    if not system_editor_mode then
-        Timer.update(dt)
-        Scheduler.update(dt)
-    end
-    ImEngine.update(dt)
-    SceneManager.update(dt)
-    Engine.elasped = Engine.elasped + dt
-end
 
-function Engine.onTouchEvent(x,y,touchId,type)
-    return SceneManager.onTouchEvent(x,y,touchId,type)
-end
-
-function Engine.onKeyEvent(keyCode,type)
-    if(Engine.focusedGameObject ~= nil) then
-        return Engine.focusedGameObject:onKeyEvent(keyCode,type)
-    end
-    return SceneManager.onKeyEvent(keyCode,type)
-end
-
-function Engine.focusGameObject(gameObj)
-    
-    if(Engine.focusedGameObject ~= nil) then -- the prev gameObj
-        Engine.focusedGameObject.focused = false
-    end
-
-    if(gameObj ~= nil) then
-        gameObj.focused = true
-    end
-
-    Engine.focusedGameObject = gameObj
-end
-
-return Engine
+return Obj

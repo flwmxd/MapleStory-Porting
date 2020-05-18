@@ -44,13 +44,11 @@ function GameObject:ctor(pos,dimen)
     self.enable= true
     self.gameObj = nil
     self.active = true
-    self.parentMatrix = Matrix.identity()
-    self.localTransofrm = Matrix.identity()
-    self.transform = Matrix.identity()
-    self.inverseTransform = Matrix.identity()
+    
+    self.transform = Transform.new()
+    self.calculatedTransform = Matrix.identity()
     self.transformDirty = true
     self.updateChildrenTransform = true
-    self.rotation = Quaternion.identity()
     self.touchId = -1
     self.touchs = { 
         [event.TOUCH_SCROLL]   =  self.onMove,
@@ -71,6 +69,10 @@ function GameObject:ctor(pos,dimen)
     self.canSerialize = true
     self.name = ""
     self.state = GameObject.NORMAL
+    self.rect = Rect.new(0,0,0,0)
+
+    self.transform:setTranslation(self.position.x,self.position.y,0)
+    self.transform:setScale(self.scaleX,self.scaleY,1)
 
 ----recommend it for editor mode-----
     self.uuid = uuid() -- enable it have a unique id ,make sure it can be used correctly in imgui
@@ -113,6 +115,7 @@ function GameObject:setScale(x,y,z)
     self.scaleX = x;
     self.scaleY = y;
     self.scaleZ = z;
+    self.transform:setScale(x,y,z)
     self:updateTransformDirty()
 end
 
@@ -129,6 +132,7 @@ end
 ---@param x number
 function GameObject:setScaleX(scaleX)
     self.scaleX = scaleX;
+    self.transform:setScale(self.scaleX,self.scaleY,1)
     self:updateTransformDirty()
 end
 
@@ -136,6 +140,7 @@ end
 ---@param y number
 function GameObject:setScaleY(scaleY)
     self.scaleY = scaleY;
+    self.transform:setScale(self.scaleX,self.scaleY,1)
     self:updateTransformDirty()
 end
 
@@ -143,6 +148,7 @@ end
 ---@param pos Vector
 function GameObject:setPosition(newPos)
     self.position = newPos
+    self.transform:setTranslation(self.position.x,self.position.y,0)
     self:updateTransformDirty()
 end
 
@@ -152,23 +158,14 @@ end
 function GameObject:setRotation(newRotation)
     local theType = typeof(newRotation)
     assert(theType == "table" or theType == "Quaternion" or theType == "number","Rotation arg error")
-    
-    if theType == "table" then
-        local roationQuaternion = Quaternion.new();
-        roationQuaternion:setEulerAngles(newRotation);
-        self.rotation = roationQuaternion
-    elseif theType == "Quaternion" then 
-        self.rotation = newRotation
-    else
-        local roationQuaternion = Quaternion.new();
-        roationQuaternion:setEulerAngles(0,0,newRotation);
-        self.rotation = roationQuaternion
+    if theType == "number" then
+        self.transform:setEulerAngles(0,0,newRotation);
     end
     self:updateTransformDirty()
 end
 
 function GameObject:updateTransform(transform)
-    self.parentMatrix = transform
+    self.transform:setParentTansform(transform)
     self:updateTransformDirty()
 end
 
@@ -179,33 +176,24 @@ function GameObject:updateTransformDirty()
     end
 end
 
-function GameObject:calculateLocalTransform()
-    self.localTransofrm:setTranslation(self.position.x,self.position.y,0)
 
-    local rotationMatrix = Matrix.new()
-  
-    rotationMatrix:setRotation(self.rotation)
-    self.localTransofrm = self.localTransofrm * rotationMatrix
-
-    local scaleMatrix = Matrix.new()
-    scaleMatrix:setScale(self.scaleX,self.scaleY,1.0)
-
-    return self.localTransofrm * scaleMatrix
-end
-
-function GameObject:calcluateTransform()
-    --log("calcluateTransform")
-    self.transform = self.parentMatrix * self:calculateLocalTransform()
+function GameObject:calculateTransform()
+    self.transform:calculateLocalTransform()
     self.transformDirty = false
     self.updateChildrenTransform = true
-    self.inverseTransform = self.transform:invert()
+    self.transform:calculateTransform()
+    self.inverseTransform = self.transform:getInverseTranform()
     self:setNativeTransform()
+
+    local x,y,z = self.transform:getTranslation()
+    local lt = Vector.new(x,y) - self:getOrigin()
+    local rb = lt + self.dimension * Vector.new(self.scaleX,self.scaleY);
+    self.rect:update(lt.x,lt.y,rb.x,rb.y)
 end
 
 function GameObject:setNativeTransform()
 
 end
-
 
 -- it will be called before update() 
 ---@param drawQueue if current obj can be visibable, it will enqueue 
@@ -219,20 +207,16 @@ function GameObject:visit(drawQueue,camera,parentTransform, parentDirty)
     end
 
     if(self.transformDirty) then
-        self:calcluateTransform()
+        self:calculateTransform()
     end
-    
 
     if camera:checkVisibility(self) and self.active then
         table.insert(drawQueue,self)
-
         for index, v in ipairs(self.gameObjs) do
             v:visit(drawQueue,camera,self.transform,self.updateChildrenTransform)
         end
-
     end
-   
-  
+    
     self.updateChildrenTransform = false
 end
 
@@ -315,19 +299,16 @@ end
 
 function GameObject:drawBox(camera)
     if self.highligted or self.showRect then 
-        local pos = Vector.new(-1,-1) - self:getOrigin()
-        local vp = camera:getViewProjection() * self.transform
-        render.drawRect(pos.x - 1,pos.y - 1,self.dimension.x + 2,self.dimension.y + 2,self.rectColor,vp)
+        --local vp = camera:getViewProjection() * self.transform:getTransform()
+        local origin = self:getOrigin()
+        render.drawRect(-origin.x,-origin.y,self.rect.width,self.rect.height,self.rectColor,camera:getViewProjection() * self.transform:getTransform())
         self.highligted = false
     end
 end
 
 -- get boundingBox based the left and top as the start point
 function GameObject:bounds()
-    local parentPos = self.transform:getTranslation()
-    local lt = Vector.new(parentPos.x,parentPos.y) - self:getOrigin()
-    local rb = lt + self.dimension * Vector.new(self.scaleX,self.scaleY);
-    return Rect.new(lt.x,lt.y,rb.x,rb.y)
+    return self.rect
 end
 
 function GameObject:getOrigin()

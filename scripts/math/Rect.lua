@@ -35,6 +35,20 @@ function Rect:ctor(left,top,right,bottom)
     self.bottom = bottom
 end
 
+function Rect:update(left,top,right,bottom)
+    self.position.x = left
+    self.position.y = top
+    self.dimension = {width = right-left,height = bottom - top}
+    
+    self.height = bottom - top
+    self.width  = right-left
+
+    self.left   = left
+    self.top    = top
+    self.right  = right
+    self.bottom = bottom
+end
+
 function Rect:getWidth()
     return self.dimension.width
 end
@@ -47,12 +61,16 @@ function Rect:contains(pos)
     return pos.x >= self.left and pos.x <= self.right and pos.y >= self.top and pos.y <= self.bottom
 end
 
+function Rect:contains2(x,y)
+    return x >= self.left and x <= self.right and y >= self.top and y <= self.bottom
+end
+
 function Rect:overlap(rect)
     return 
-    self:contains(Vector.new(rect.left,rect.top)) or 
-    self:contains(Vector.new(rect.right,rect.top)) or 
-    self:contains(Vector.new(rect.left,rect.bottom)) or 
-    self:contains(Vector.new(rect.right,rect.bottom))
+    self:contains2(rect.left,rect.top) or 
+    self:contains2(rect.right,rect.top) or 
+    self:contains2(rect.left,rect.bottom) or 
+    self:contains2(rect.right,rect.bottom)
 end
 
 function Rect.sub(rect,vector)
