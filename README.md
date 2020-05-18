@@ -34,15 +34,15 @@ if you want to add your own function,please read more NativeAPI for lua under th
 
 # Dependency
 
-* [glfw3](https:github.com/glfw/glfw) 
-* [glew](https:github.com/nigels-com/glew) 
-* [freetype2](https:www.freetype.org/) 
-* [iconv](http:www.gnu.org/software/libiconv/) 
-* [lua](http:www.lua.org/) 
+* [glfw3](https://github.com/glfw/glfw) 
+* [glew](https://github.com/nigels-com/glew) 
+* [freetype2](https://www.freetype.org/) 
+* [iconv](http://www.gnu.org/software/libiconv/) 
+* [lua](http://www.lua.org/) 
 * [openal](www.openal.org/) 
 * [zlib](www.zlib.net/) 
-* [imgui](https:github.com/ocornut/imgui)
-* [WzTools](https:github.com/flwmxd/WzTools)
+* [imgui](https://github.com/ocornut/imgui)
+* [WzTools](https://github.com/flwmxd/WzTools)
 
 # Main features
 
