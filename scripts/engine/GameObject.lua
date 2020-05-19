@@ -69,7 +69,7 @@ function GameObject:ctor(pos,dimen)
     self.canSerialize = true
     self.name = ""
     self.state = GameObject.NORMAL
-    self.rect = Rect.new(0,0,0,0)
+    self.rect = Rect.new(self.position.x,self.position.y,self.position.x + self.dimension.x,self.position.y + self.dimension.y)
 
     self.transform:setTranslation(self.position.x,self.position.y,0)
     self.transform:setScale(self.scaleX,self.scaleY,1)
@@ -80,6 +80,8 @@ function GameObject:ctor(pos,dimen)
     self.showRect = false
     self.rectColor = 0xFF00FF80
 -------------------------------------
+    self.origin = Vector.new(0,0)
+
 end
 
 ---
@@ -116,6 +118,7 @@ function GameObject:setScale(x,y,z)
     self.scaleY = y;
     self.scaleZ = z;
     self.transform:setScale(x,y,z)
+    self:updateBox()
     self:updateTransformDirty()
 end
 
@@ -124,6 +127,7 @@ end
 ---@param dimension Vector
 function GameObject:setDimension(dimension)
     self.dimension = dimension
+    self:updateBox()
     self:updateTransformDirty()
 end
 
@@ -132,6 +136,7 @@ end
 ---@param x number
 function GameObject:setScaleX(scaleX)
     self.scaleX = scaleX;
+    self:updateBox()
     self.transform:setScale(self.scaleX,self.scaleY,1)
     self:updateTransformDirty()
 end
@@ -140,6 +145,7 @@ end
 ---@param y number
 function GameObject:setScaleY(scaleY)
     self.scaleY = scaleY;
+    self:updateBox()
     self.transform:setScale(self.scaleX,self.scaleY,1)
     self:updateTransformDirty()
 end
@@ -148,10 +154,18 @@ end
 ---@param pos Vector
 function GameObject:setPosition(newPos)
     self.position = newPos
+    self:updateBox()
     self.transform:setTranslation(self.position.x,self.position.y,0)
     self:updateTransformDirty()
 end
 
+
+function GameObject:updateBox()
+    self.origin = self:getOrigin()
+    local lt = self.position - self.origin
+    local rb = lt + self.dimension * Vector.new(self.scaleX,self.scaleY);
+    self.rect:update(lt.x,lt.y,rb.x,rb.y)
+end
 
 -- set position in the world
 ---@param newRotation can be number and Quaternion or table which contains X,Y,Z
@@ -184,11 +198,6 @@ function GameObject:calculateTransform()
     self.transform:calculateTransform()
     self.inverseTransform = self.transform:getInverseTranform()
     self:setNativeTransform()
-
-    local x,y,z = self.transform:getTranslation()
-    local lt = Vector.new(x,y) - self:getOrigin()
-    local rb = lt + self.dimension * Vector.new(self.scaleX,self.scaleY);
-    self.rect:update(lt.x,lt.y,rb.x,rb.y)
 end
 
 function GameObject:setNativeTransform()
@@ -210,13 +219,17 @@ function GameObject:visit(drawQueue,camera,parentTransform, parentDirty)
         self:calculateTransform()
     end
 
-    if camera:checkVisibility(self) and self.active then
+    if self.active and camera:checkVisibility(self.transform,self.rect,self.origin) then
         table.insert(drawQueue,self)
-        for index, v in ipairs(self.gameObjs) do
-            v:visit(drawQueue,camera,self.transform,self.updateChildrenTransform)
-        end
+        self.visibile = true
+    else
+        self.visibile = false
     end
-    
+
+    for index, v in ipairs(self.gameObjs) do
+        v:visit(drawQueue,camera,self.transform,self.updateChildrenTransform)
+    end
+
     self.updateChildrenTransform = false
 end
 
@@ -231,7 +244,6 @@ function GameObject:addChild(child)
         self.gameObjs = {}
     end
     child.parent = self
-    child.parentMatrix = self.transform
     table.insert(self.gameObjs,child)
     return child
 end
@@ -312,7 +324,7 @@ function GameObject:bounds()
 end
 
 function GameObject:getOrigin()
-    return Vector.new(0,0)
+    return self.origin
 end
 
 

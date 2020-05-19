@@ -33,10 +33,8 @@ local Npc = class("Npc",GameObject)
 function Npc:ctor(id,node)
     self.id = id
     local strId = string.format("%07d.img",id)
-    GameObject.ctor(self, Vector.new(node["x"]:toInt(),  node["y"]:toInt()))
     self.footHold = node["fh"]:toInt()
     local strSrc = WzFile.string["Npc.img"][id]
-    self.name = strSrc["name"]:toString()
     self.animations = {}
     self.stances = {}
     local src = WzFile.npc[strId]
@@ -61,8 +59,14 @@ function Npc:ctor(id,node)
         end
     end)
 
+    GameObject.ctor(self, Vector.new(node["x"]:toInt(),  node["y"]:toInt()),Vector.new(self.animations[self.stance]:getWidth(),self.animations[self.stance]:getHeight()))
+    self.origin = self.animations[self.stance]:getOrigin()
+    self.name = strSrc["name"]:toString()
     self:addChild(TextView.new(Vector.new(0,0),Vector.new(0,0),text.CENTER,text.A12B,text.YELLOW,self.name)):setNameTag(true)
+end
 
+function Npc:getOrigin()
+    return self.animations[self.stance]:getOrigin()
 end
 
 function Npc:draw(camera)

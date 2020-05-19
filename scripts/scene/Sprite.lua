@@ -47,6 +47,8 @@ function Sprite:init()
         self.name = self.node
     end
     self.dimension = Vector.new(self.animation:getWidth(),self.animation:getHeight())
+    self.origin = self.animation:getOrigin()
+    self:updateBox()
 end
 
 function Sprite:draw(camera)
@@ -64,7 +66,7 @@ function Sprite:update(dt)
 end
 
 function Sprite:getOrigin()
-    if self.animation == nil then return Vector.new(0,0) end return self.animation:getOrigin()
+    if self.animation == nil then return self.origin end return self.animation:getOrigin()
 end
 
 function Sprite:setNativeTransform()

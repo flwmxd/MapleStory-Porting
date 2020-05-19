@@ -31,10 +31,12 @@ function Camera:ctor(contentSize)
     self.viewProjection = Matrix.identity()
     self:recalculateProjection()
     self.visibileRect = Rect.new(
-        0,0,
-        self.contentSize.x,
-        self.contentSize.y
+        -400,
+        -300,
+        400,
+        300
     )
+    self.currentRect = Rect.new(0,0,0,0 )
 end
 
 
@@ -45,14 +47,17 @@ function Camera:getViewProjection()
     return self.viewProjection
 end
 
-function Camera:checkVisibility(gameObject)
-    local bounds = gameObject:bounds()
-    -- it has transformed into the world location,
-    -- but in a sample 2d game, the world localtion is equal to screen location
-    --
-    -- the default Pos is zero (left,top in screen as the origin)
-    return self.visibileRect:overlap(bounds) or true
-   -- return true
+function Camera:checkVisibility(transform,boundingBox,origin)
+    --world pos
+    local x,y,z = transform:getTranslation()
+    --convert to screen location
+    local cx,cy,cz = self:getViewProjection():transformVector(x,y,1)
+    cx = cx * 400  - origin.x
+    cy = -cy * 300 - origin.y
+    -- don't new object in there because it can result in full gc and consume to much cpu resources
+    self.currentRect:update(cx ,cy,cx + boundingBox.width,cy + boundingBox.height)
+    --log(string.format( "%f,%f,%f,%f",self.currentRect.left,self.currentRect.top,self.currentRect.right,self.currentRect.bottom))
+    return self.visibileRect:overlap(self.currentRect)
 end
 
 function Camera:setTarget(gameObj)
@@ -63,7 +68,6 @@ end
 
 function Camera:recalculateProjection()
     self.projection:setOrthographic(-400,400,-300,300,1,-1)
-    --self.projection:setOrthographicFromSize(800,600, -1.0, 1.0);
 end
 
 function Camera:calculateViewProjection()

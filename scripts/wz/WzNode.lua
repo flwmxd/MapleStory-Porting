@@ -54,20 +54,30 @@ function WzNode:toReal(default)
     return wz.toReal(self.rawPtr,default or 0)
 end
 
+function WzNode:toBoolean(default)
+    return wz.toBoolean(self.rawPtr,default or false)
+end
+
 function WzNode:toVector()
     return wz.toVector(self.rawPtr)
 end
 
 
 function WzNode:foreach(callback)
+    local t
     for k, v in pairs(self.children) do
         if type(v) ~= "table" then
-            callback(k,WzNode.new(v,k))
+            t = callback(k,WzNode.new(v,k))
         else
-            callback(k,v)
+            t = callback(k,v)
+        end
+        if t ~= nil then
+            return t
         end
     end
 end
+
+
 
 
 --@param identity is an optional arg
@@ -93,6 +103,24 @@ function WzNode.new(path,identity)
     end
     return instance
 end
+
+
+function WzNode.add(a,b)
+    local left = a
+    local right = b
+
+    if type(a) == "table" then
+        left = a:toString()
+    end
+
+    if type(b) == "table" then
+        left = b:toString()
+    end
+
+    return left .. right
+end
+
+WzNode.__add = WzNode.add
 
 
 return WzNode

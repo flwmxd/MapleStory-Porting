@@ -11,7 +11,7 @@ The business logic are written by lua.
 | ----|------|
 [![Build status](https://img.shields.io/badge/build-pass-green.svg)]()|[![Build Status](https://img.shields.io/badge/porting-fail-red.svg)]()
 
-![image](https://raw.githubusercontent.com/flwmxd/PharaohStroy/master/img/map.png)
+![image](https://raw.githubusercontent.com/flwmxd/PharaohStroy/master/img/main-screen.png)
 
 
 # Usage 

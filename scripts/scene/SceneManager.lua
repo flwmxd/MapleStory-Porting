@@ -36,20 +36,19 @@ SceneManager.camera = Camera.new(Vector.new(800,600))
 function SceneManager.addScene(scene)
     scene:init()
     scene:onCreate()
-    SceneManager.scenes = {}
-    table.insert(SceneManager.scenes,1,scene)
     SceneManager.rootScene = scene
+    scene:visit(SceneManager.drawQueue,SceneManager.camera,SceneManager.transform,true)
     SceneManager.camera:setTarget(scene)
     return scene
 end
 
 function SceneManager.removeScene(scene)
-    for i = #SceneManager.scenes, 1, -1 do
-        local v = SceneManager.scenes[i]
+    if SceneManager.rootScene ~= nil then 
+        local v = SceneManager.rootScene
         if v.uuid == scene.uuid then
-            table.remove( SceneManager.scenes,i)
-            scene:onDestory()
+            v:onDestory()
         end
+        SceneManager.rootScene = nil
     end
 end
 
@@ -62,17 +61,18 @@ function SceneManager.draw()
 end
 
 function SceneManager.update(dt)
-
     local v = SceneManager.rootScene
-    v:visit(SceneManager.drawQueue,SceneManager.camera,SceneManager.transform,SceneManager.updateScenes)
-    if v.active and not system_editor_mode then
-        v:update(dt)
+    if v~= nil then
+        v:visit(SceneManager.drawQueue,SceneManager.camera,SceneManager.transform,false)
+        if v.active and not system_editor_mode then
+            v:update(dt)
+        end
     end
-    SceneManager.updateScenes = false
 end
 
 function SceneManager.onTouchEvent(x,y,touchId,type)
-    for i,v in ipairs(SceneManager.scenes) do
+    local v = SceneManager.rootScene
+    if v~= nil then
         if  v.active and v:onTouchEvent(x,y,touchId,type) then
             return true
         end
@@ -81,8 +81,8 @@ function SceneManager.onTouchEvent(x,y,touchId,type)
 end
 
 function SceneManager.onKeyEvent(keyCode,type)
-    for i = #SceneManager.scenes, 1, -1 do
-        local v = SceneManager.scenes[i]
+    local v = SceneManager.rootScene
+    if v~= nil then
         if  v.active and v:onKeyEvent(keyCode,type) then
             return true
         end

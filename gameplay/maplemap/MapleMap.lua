@@ -28,13 +28,27 @@ local Tile = require("Tile")
 local Obj = require("Obj")
 local Npc = require("Npc")
 local Portal = require("Portal")
+local Background = require("Background")
 
 local MapleMap = class("MapleMap",Scene)
 
 function MapleMap:ctor(mapId)
     Scene.ctor(self,Vector.new(0,0),Vector.new(800,600))
     self.mapId = mapId
-    self.name = mapId .. ""
+    self.name = MapleMap.getMapName(mapId) .. "("..mapId..")"
+end
+
+function MapleMap.getMapName(mapId)
+    local node = WzFile.string["Map.img"];
+    local name = mapId ..""
+
+    return node:foreach(function(k,v) 
+        return v:foreach(function(k2,v2) 
+            if k2 == name then
+                return v2["mapName"]:toString()
+            end
+        end)
+    end)
 end
 
 function MapleMap:init()
@@ -49,9 +63,12 @@ function MapleMap:init()
         src = WzFile.map["Map"]["Map"..prefix][link:toString()..".img"];
     end
 
+    local bg,fg = self:loadBackground(src["back"])
+    self:addLayer(bg)
     self:addTilesObjs(src)
     self:loadNpc(src)
     self:loadPortals(src)
+    self:addLayer(fg)
 end
 
 -- @param node -> wzNode
@@ -101,6 +118,29 @@ function MapleMap:loadPortals(node)
     end)
 end
 
+function MapleMap:loadBackground(src)
+    local no = 0
+	local back = src[no]
+    local backSrc = WzFile.map["Back"]
+    local layer = Layer.new(Vector.new(0,0),Vector.new(5000,5000))
+    local foreground = Layer.new(Vector.new(0,0),Vector.new(5000,5000))
+  
+    layer.name = "Backgrounds"
+    foreground.name = "Foreground"
+
+    while back ~= nil do
+        local front = back["front"]:toBoolean()
+        if front then
+        	foreground:addChild(Background.new(back, backSrc))
+        else
+            layer:addChild(Background.new(back, backSrc))
+        end
+        no = no + 1
+		back = src[no]
+    end
+
+    return layer,foreground
+end
 
 function MapleMap:loadNpc(node)
   

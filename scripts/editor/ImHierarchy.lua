@@ -40,16 +40,15 @@ ImHierarchy = {
 
 function ImHierarchy.draw()
 	if( imgui.Begin(ImHierarchy.name,ImHierarchy.open) ) then 
-		if #SceneManager.scenes == 0 then 
-			ImHierarchy.rightClick()
-		end
+		ImHierarchy.rightClick()
 		ImHierarchy.listScenes()
 	end
 	imgui.End()
 end
 
 function ImHierarchy.listScenes()
-	for i,v in ipairs(SceneManager.scenes) do
+	local v = SceneManager.rootScene
+	if v~= nil then 
 		if(imgui.TreeNode(string.format("%s(%s) , size : %d",v.name,v.__cname,#v.gameObjs))) then
 			ImHierarchy.sceneNodeClick(v,v.__cname)
 			ImHierarchy.focusItem(v)
@@ -172,9 +171,11 @@ end
 function ImHierarchy.listSubItems(parent,subNode)
 
 	for i,v in ipairs(subNode) do
-		local nodeName = string.format( "%s(%s)",v.name,v.__cname)
+		local nodeName = string.format( "%s(%s) visibile",v.name,v.__cname)
+		if not v.visibile  then 
+			nodeName = string.format( "%s(%s)",v.name,v.__cname)
+		end 
 		imgui.PushID(v.uuid)
-
 
 		if imgui.IsItemHovered() then
 			v:highlight()

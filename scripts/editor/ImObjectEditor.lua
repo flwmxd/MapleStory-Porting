@@ -39,6 +39,7 @@ function ImObjectEditor.draw()
             imgui.Text("Position")
             
             ImObjectEditor.drawPosition(obj)
+            ImObjectEditor.drawOrigin(obj)
             ImObjectEditor.drawTextProperties(obj) 
             ImObjectEditor.drawEditProperties(obj) 
 
@@ -55,18 +56,31 @@ function ImObjectEditor.draw()
             ImObjectEditor.drawNpcAnimations(obj)
             ImObjectEditor.drawPortalAnimations(obj)
 
+            if imgui.Button("LookAt") then
+                SceneManager.camera:setTarget(obj)
+            end
             --ImObjectEditor.drawChildren(obj)
         end  
 	end
     imgui.End()
 end
 
+
+function ImObjectEditor.drawOrigin(obj)
+    local ret,x,y
+    ret,x = imgui.DragFloat("origin X",obj.origin.x,1,0,0,"%.0f");
+    ret,y = imgui.DragFloat("origin Y",obj.origin.y,1,0,0,"%.0f");
+
+    if x ~= obj.origin.x or y ~= obj.origin.y then
+        obj.origin.x = x
+        obj.origin.y = y
+    end
+
+    imgui.Separator()
+end
+
 function ImObjectEditor.drawPortalAnimations(obj)
     if obj.__cname == "Portal" then
-
-        if imgui.Button("LookAt") then
-            SceneManager.camera:setTarget(obj)
-        end
 
         imgui.PushID(obj.uuid .. "Animation")
         if obj.animation ~= nil then
@@ -97,6 +111,7 @@ function ImObjectEditor.drawNpcAnimations(obj)
             imgui.Image(txtId,anim:getWidth(),anim:getHeight(),l,t,r,b)
         end
 
+        
     end
 end
 

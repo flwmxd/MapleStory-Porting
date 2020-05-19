@@ -55,8 +55,9 @@ function Portal:ctor(node)
     local pos = Vector.new(node["x"]:toInt(),  node["y"]:toInt())
     --portal type
     self.pt = node["pt"]:toInt()
-    self.name = node["pn"]:toString()
     Sprite.ctor(self,Portal.loadAnimation(self.pt),pos)
+    self.name = node["pn"]:toString()
+    self:updateBox()
 end
 
 function Portal.loadAnimation(pt)

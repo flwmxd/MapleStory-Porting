@@ -66,11 +66,17 @@ function Rect:contains2(x,y)
 end
 
 function Rect:overlap(rect)
-    return 
-    self:contains2(rect.left,rect.top) or 
+    --return 
+    --[[self:contains2(rect.left,rect.top) or 
     self:contains2(rect.right,rect.top) or 
     self:contains2(rect.left,rect.bottom) or 
-    self:contains2(rect.right,rect.bottom)
+    self:contains2(rect.right,rect.bottom)]]
+
+    return math.abs((self.left + self.right) - (rect.left + rect.right)) < (math.abs(self.right + rect.right - self.left - rect.left))
+    and math.abs((self.top + self.bottom) - (rect.top + rect.bottom)) < (math.abs(self.bottom + rect.bottom - self.top - rect.top))
+
+
+
 end
 
 function Rect.sub(rect,vector)
