@@ -73,7 +73,6 @@ end
 
 -- @param node -> wzNode
 function MapleMap:addTilesObjs(node)
-    log("addTilesObjs")
     for i = 0, 7 do
         local src = node[i]
         if src ~= nil then 
@@ -85,25 +84,52 @@ function MapleMap:addTilesObjs(node)
                 local objs = wz.expand(src["obj"])
                 layer.drag = false
                 layer.name = "MapTile"..i
+
+
+
+
+                
+                local mapObjs = GameObject.new()
+
+                if objs ~= nil then
+                    objs:foreach(function(k,v)
+                        if v ~= nil then
+                            mapObjs:addChild(Obj.new(v))
+                        end
+                    end)
+                end
+
+
+                table.sort(mapObjs.gameObjs, function (a,b)
+                    if a.z == b.z then return a.zId < b.zId end
+                    return a.z < b.z
+                end)
+
+                layer:addChild(mapObjs)
+
+
+
+                local mapTiles = GameObject.new()
+
                 if(tls ~= nil) then
                    
                     local tsNode = WzFile.map["Tile"][ts]
                     tls:foreach(function(k,v) 
                         local desNode = tsNode[v["u"]][v["no"]]
                         if desNode ~= nil then
-                            layer:addChild(Tile.new(v,desNode))
+                            mapTiles:addChild(Tile.new(v,desNode))
                         end
                     end)
-                    
                 end
 
-                if objs ~= nil then
-                    objs:foreach(function(k,v)
-                        if v ~= nil then
-                            layer:addChild(Obj.new(v))
-                        end
-                    end)
-                end
+
+                table.sort(mapTiles.gameObjs, function (a,b)
+                    return a.z < b.z
+                end)
+
+
+                layer:addChild(mapTiles)
+
 
                 self:addChild(layer)
 

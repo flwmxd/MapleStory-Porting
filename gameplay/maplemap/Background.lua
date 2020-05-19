@@ -43,14 +43,138 @@ function Background:ctor(src, backNode)
 	self.flipped = src["f"]:toBoolean();
 	self.cx = src["cx"]:toInt()
 	self.cy = src["cy"]:toInt()
-	self.rx = src["rx"]:toInt()
-	self.ry = src["ry"]:toInt()
-    self.type = src["type"]:toInt()
+	self.rx = src["rx"]:toReal()
+	self.ry = src["ry"]:toReal()
+	self.type = src["type"]:toInt()
+
+
     local n = "ani"
     if not self.animated then n = "back" end
     Sprite.ctor(self,backNode[src["bS"] + ".img"][n][src["no"]:toString()],Vector.new(src["x"]:toInt(),src["y"]:toInt()))
+
+	if self.flipped then
+		self:setScaleX(-1)
+	end
+	self.hspeed = 0
+	self.vspeed = 0
+	self:setType()
+	self.drawPos = Matrix.new()
 end
 
 
+
+function Background:setType()
+
+
+	local width = 800
+	local height = 600
+
+
+	if self.cx == 0 then
+		self.cx = math.max(self.dimension.x, 1)
+	end
+	if self.cy == 0 then
+		self.cy = math.max(self.dimension.y, 1)
+	end
+	self.htile = 1
+	self.vtile = 1
+
+	--Horizontal
+	if self.type == Background.HTILED or self.type == Background.HMOVEA then
+		self.htile = width / self.cx + 6
+	end
+	--Verticle
+	if self.type == Background.VTILED or self.type == Background.VMOVEA then
+		self.vtile = height / self.cx + 6
+	end
+
+	if self.type == Background.TILED or self.type == Background.HMOVEB  or self.type == Background.VMOVEB then
+		self.htile = width / self.cx + 6;
+		self.vtile = height / self.cy + 6;
+	end
+
+
+	if self.type  == Background.HMOVEA or self.type == Background.HMOVEB then 
+		self.hspeed = self.rx / 16
+	end
+
+	if self.type  == Background.VMOVEA or self.type == Background.VMOVEB then 
+		self.vspeed = self.ry / 16
+	end
+
+end	
+
+
+function Background:update(dt)
+	Sprite.update(self,dt)
+
+	if self.hspeed ~= 0 then
+		self.position.x = self.position.x + self.hspeed
+	else -- give a delta effect if the camera move
+		
+	end
+	
+	if self.vspeed ~= 0 then
+		self.position.y = self.position.y + self.vspeed
+
+	else
+
+	end
+
+	if self.htile > 1 then
+		while (self.position.x > 0) do
+			self.position.x = self.position.x - self.cx;
+		end
+		while (self.position.x < -self.cx) do
+			self.position.x = self.position.x + self.cx;
+		end
+	end
+
+	if (self.vtile > 1) then
+	
+		while (self.position.y > 0)  do
+			self.position.y = self.position.y - self.cy;
+		end
+		while (self.position.y < -self.cy)  do
+			self.position.y = self.position.y + self.cy;
+		end
+	end
+	
+end
+
+function Background:draw(camera)
+
+	local ix = math.modf(self.position.x)
+	local iy = math.modf(self.position.y)
+
+	local tw = self.cx * self.htile;
+	local th = self.cy * self.vtile; 
+
+	for tx = 0,self.htile - 1 do
+		for ty = 0,self.vtile - 1 do
+			self.drawPos:setTranslation(ix + tx * self.cx, iy + ty * self.cx,0)
+			if self.animation ~= nil then
+				self.animation:draw(camera:getViewProjection() * self.drawPos)
+			end
+		end
+	end
+
+end
+
+function Background:setNativeTransform()
+    if self.animation ~= nil then
+       self.animation:updateTransform(self.transform)
+    end
+end
+
+function Background:calculateTransform()
+	self.transform:setTranslation(self.position.x,self.position.y,0)
+    self.transform:calculateLocalTransform()
+    self.transformDirty = false
+    self.updateChildrenTransform = true
+    --self.transform:calculateTransform()
+    --self.inverseTransform = self.transform:getInverseTranform()
+    self:setNativeTransform()
+end
 
 return Background

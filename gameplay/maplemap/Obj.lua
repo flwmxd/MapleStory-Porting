@@ -31,6 +31,17 @@ function Obj:ctor(node)
     if(spNode ~= nil) then
         Sprite.ctor(self,spNode,pos)
     end
+
+    self.flipX = node["f"]:toBoolean()
+    if self.flipX then
+        self:setScaleX(-1)
+    end
+
+    self.z = node["z"]:toInt()
+    self.zM = node["zM"]:toInt()
+
+    self.zId = tonumber(node.identity) or 0
+
 end
 
 

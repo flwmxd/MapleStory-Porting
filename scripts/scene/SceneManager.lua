@@ -64,9 +64,9 @@ function SceneManager.update(dt)
     local v = SceneManager.rootScene
     if v~= nil then
         v:visit(SceneManager.drawQueue,SceneManager.camera,SceneManager.transform,false)
-        if v.active and not system_editor_mode then
+        --if v.active and not system_editor_mode then
             v:update(dt)
-        end
+        --end
     end
 end
 

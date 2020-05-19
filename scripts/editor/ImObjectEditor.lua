@@ -267,7 +267,7 @@ function ImObjectEditor.drawScale(obj)
     ret,x = imgui.DragFloat("scaleX",obj.scaleX,0.001,0,0,"%.3f");
     ret,y = imgui.DragFloat("scaleY",obj.scaleY,0.001,0,0,"%.3f");
     if x ~= obj.scaleX or y ~= obj.scaleY then
-        --obj:setScale(x,y,1)
+        obj:setScale(x,y,1)
     end
     imgui.Separator()
 end

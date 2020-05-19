@@ -26,6 +26,15 @@ local Tile = class("Tile",Sprite)
 function Tile:ctor(node,destNode)
     local pos = Vector.new(node["x"]:toInt(),  node["y"]:toInt())
     Sprite.ctor(self,destNode,pos)
+    self.z = 0
+    local zNode = destNode["z"]
+    if zNode == nil then
+        self.z = destNode["zM"]:tonInt()
+    else
+        self.z = zNode:toInt()
+    end
+
+   
 end
 
 

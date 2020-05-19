@@ -136,8 +136,8 @@ end
 ---@param x number
 function GameObject:setScaleX(scaleX)
     self.scaleX = scaleX;
-    self:updateBox()
     self.transform:setScale(self.scaleX,self.scaleY,1)
+    self:updateBox()
     self:updateTransformDirty()
 end
 
