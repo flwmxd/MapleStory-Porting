@@ -60,6 +60,10 @@ function Portal:ctor(node)
     self:updateBox()
 end
 
+function Portal:isSpawnPoint()
+    return self.pt == "sp"
+end
+
 function Portal.loadAnimation(pt)
     if Portal.animations == nil then
         Portal.animations = {}

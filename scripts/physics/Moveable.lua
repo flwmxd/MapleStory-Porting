@@ -18,22 +18,45 @@
 
 dofile("scripts/Tools/Class.lua")
 
-local Vector = require("Vector")
-local Sprite = require("Sprite")
-local Tile = class("Tile",Sprite)
+local Moveable = class("Moveable")
 
+function Moveable:ctor(x,y)
+    self.x = x
+    self.y = x
+    self.initX = x
+    self.initY = y
+    self.hspeed = 0
+    self.vspeed = 0
+end
 
-function Tile:ctor(node,destNode)
-    local pos = Vector.new(node["x"]:toInt(),  node["y"]:toInt())
-    Sprite.ctor(self,destNode,pos)
-    self.z = 0
-    local zNode = destNode["z"]
-    if zNode == nil then
-        self.z = destNode["zM"]:tonInt()
-    else
-        self.z = zNode:toInt()
-    end
+function Moveable:setX(x)
+    self.x = x
+end
+
+function Moveable:setY(y)
+    self.y = y
+end
+
+function Moveable:move()
+    self.y = self.y + self.vspeed
+    self.x = self.x + self.hspeed
+end
+
+function Moveable:nextX()
+    return self.x + self.hspeed
+end
+
+function Moveable:nextY()
+    return self.y + self.vspeed
+end
+
+function Moveable:isHorizontal()
+    return self.hspeed ~= 0.0
+end
+
+function Moveable:isVertical()
+    return self.vspeed ~= 0.0
 end
 
 
-return Tile
+return Moveable

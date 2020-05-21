@@ -42,6 +42,19 @@ function ImHierarchy.draw()
 	if( imgui.Begin(ImHierarchy.name,ImHierarchy.open) ) then 
 		ImHierarchy.rightClick()
 		ImHierarchy.listScenes()
+		--local inverse = SceneManager.camera:getInverseProjection()
+		--local tans = inverse:getTranslation()
+		--imgui.Text(string.format("%f,%f",tans.x,tans.y))
+		imgui.Separator()
+		local ret,x,y
+		ret,x = imgui.DragFloat("Camera X", SceneManager.camera.x,1,0,0,"%.0f");
+		ret,y = imgui.DragFloat("Camera Y", SceneManager.camera.y,1,0,0,"%.0f");
+	
+		if x ~= SceneManager.camera.x or y ~= SceneManager.camera.y then
+			SceneManager.camera:setPosition(x,y)
+		end
+
+			
 	end
 	imgui.End()
 end

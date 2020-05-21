@@ -29,6 +29,7 @@ function Camera:ctor(contentSize)
     self.projection = Matrix.identity()
     self.lookTarget = nil
     self.viewProjection = Matrix.identity()
+    self.inverseTransform = Matrix.identity()
     self:recalculateProjection()
     self.visibileRect = Rect.new(
         -400,
@@ -37,6 +38,8 @@ function Camera:ctor(contentSize)
         300
     )
     self.currentRect = Rect.new(0,0,0,0 )
+    self.x = 0
+    self.y = 0
 end
 
 
@@ -45,6 +48,16 @@ function Camera:getViewProjection()
         self:calculateViewProjection()
     end
     return self.viewProjection
+end
+
+
+
+function Camera:getInverseProjection()
+    if self.inverseDiry then
+        self.inverseDiry = false
+        self.inverseTransform = self:getViewProjection():invert()
+    end
+    return self.inverseTransform
 end
 
 function Camera:checkVisibility(transform,boundingBox,origin)
@@ -57,13 +70,22 @@ function Camera:checkVisibility(transform,boundingBox,origin)
     -- don't new object in there because it can result in full gc and consume to much cpu resources
     self.currentRect:update(cx ,cy,cx + boundingBox.width,cy + boundingBox.height)
     --log(string.format( "%f,%f,%f,%f",self.currentRect.left,self.currentRect.top,self.currentRect.right,self.currentRect.bottom))
-    return self.visibileRect:overlap(self.currentRect)
+    return self.visibileRect:overlap(self.currentRect) 
+end
+
+function Camera:setPosition(x,y)
+    self.x = x
+    self.y = y
+    self.projection:setOrthographic(-400+x,400+x,-300+y,300+y,1,-1)
+    self.viewProjectionDirty = true
+    self.inverseDiry = true
 end
 
 function Camera:setTarget(gameObj)
     log("Camera:setTarget")
     self.viewProjectionDirty = true
     self.lookTarget = gameObj
+    self.inverseDiry = true
 end
 
 function Camera:recalculateProjection()

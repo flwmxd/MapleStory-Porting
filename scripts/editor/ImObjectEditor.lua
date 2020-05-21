@@ -24,7 +24,25 @@ ImObjectEditor = {
 	open = true,
     name = "ObjectEditor",
     value = 0,
-    npcStance = ""
+    npcStance = "",
+    mobStance = "STAND",
+    mobStanceV  = 4
+}
+
+ImObjectEditor.mobStances = {
+    ["MOVE"]= 2,
+    ["STAND"] = 4,
+    ["JUMP"] = 6,
+    ["HIT" ]= 8,
+    ["DIE" ]= 10,
+    ["ATTACK_1"] = 12,
+    ["ATTACK_2"] = 14,
+    ["ATTACK_3"] = 16,
+    ["ATTACK_4"] = 18,
+    ["SKILL_1"]= 20,
+    ["SKILL_2"]= 22,
+    ["SKILL_3"]= 24,
+    ["SKILL_4"]= 26
 }
 
 function ImObjectEditor.draw()
@@ -53,9 +71,9 @@ function ImObjectEditor.draw()
             ImObjectEditor.drawRectColor(obj)
             ImObjectEditor.drawListener(obj)
             ImObjectEditor.drawBindScript(obj)
+            ImObjectEditor.drawSpritesAnimation(obj)
             ImObjectEditor.drawNpcAnimations(obj)
-            ImObjectEditor.drawPortalAnimations(obj)
-
+            ImObjectEditor.drawMobAnimations(obj)
             if imgui.Button("LookAt") then
                 SceneManager.camera:setTarget(obj)
             end
@@ -79,9 +97,17 @@ function ImObjectEditor.drawOrigin(obj)
     imgui.Separator()
 end
 
+function ImObjectEditor.drawSpritesAnimation(obj) 
+    imgui.PushID(obj.uuid .. "Textures")
+    if obj.animation ~= nil then
+        local txtId,l,r,t,b = obj.animation:getTexture()
+        imgui.Image(txtId,obj.animation:getWidth(),obj.animation:getHeight(),l,t,r,b)
+    end
+    imgui.PopID()
+end
+
 function ImObjectEditor.drawPortalAnimations(obj)
     if obj.__cname == "Portal" then
-
         imgui.PushID(obj.uuid .. "Animation")
         if obj.animation ~= nil then
             local txtId,l,r,t,b = obj.animation:getTexture()
@@ -90,10 +116,33 @@ function ImObjectEditor.drawPortalAnimations(obj)
         imgui.PopID()
     end
 end
+function ImObjectEditor.drawMobAnimations(obj)
+    if obj.__cname == "Mob" then
+        imgui.PushID(obj.uuid .. "Animation")
+        if imgui.BeginCombo("Animation",ImObjectEditor.mobStance) then
 
+            for key, value in pairs(ImObjectEditor.mobStances) do
+                if imgui.Selectable(key) then  
+                    ImObjectEditor.mobStance = key
+                    ImObjectEditor.mobStanceV = value
+                end
+            end
+
+            imgui.EndCombo()
+        end
+        imgui.PopID()
+
+        if ImObjectEditor.mobStanceV ~= nil then
+            local anim = obj.animations[ImObjectEditor.mobStanceV]
+            if anim ~= nil then
+                local txtId,l,r,t,b = anim:getTexture()
+                imgui.Image(txtId,anim:getWidth(),anim:getHeight(),l,t,r,b)
+            end
+        end
+    end
+end
 function ImObjectEditor.drawNpcAnimations(obj)
     if obj.__cname == "Npc" then
-
         imgui.PushID(obj.uuid .. "Animation")
         if imgui.BeginCombo("Animation",ImObjectEditor.npcStance) then
             for key, value in pairs(obj.stances) do
@@ -104,14 +153,11 @@ function ImObjectEditor.drawNpcAnimations(obj)
             imgui.EndCombo()
         end
         imgui.PopID()
-
         if ImObjectEditor.npcStance ~= "" then
             local anim = obj.animations[ImObjectEditor.npcStance]
             local txtId,l,r,t,b = anim:getTexture()
             imgui.Image(txtId,anim:getWidth(),anim:getHeight(),l,t,r,b)
         end
-
-        
     end
 end
 
@@ -373,6 +419,24 @@ function ImObjectEditor.drawListener(obj)
     ImObjectEditor.handleScriptCombo(obj,"clickScriptName","clickFunName","clickModule","Click Listener")
     ImObjectEditor.handleScriptCombo(obj,"releaseScriptName","releaseFunName","releaseModule","Release Listener")
     ImObjectEditor.handleScriptCombo(obj,"moveScriptName","moveFunName","moveModule","Move Listener")
+
+   imgui.PushID(obj.uuid.." Script KeyEvent")
+    local ret, str
+    ret, str = imgui.InputTextWithHint("","KeyEvent Script",obj.onKeyScript)
+    if ret and str ~= obj.onKeyScript then
+        obj.onKeyScript = str
+    end
+    imgui.PopID()
+
+    if imgui.BeginDragDropTarget() then
+        local ret = imgui.AcceptDragDropPayload("DragFile")
+		if ret ~= nil then
+            obj.onKeyScript = ret
+		end
+		imgui.EndDragDropTarget()
+	end
+ 
+    imgui.Separator()
  
 end
 

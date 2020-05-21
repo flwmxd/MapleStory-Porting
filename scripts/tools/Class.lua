@@ -145,6 +145,7 @@ function instanceOf(cls, name)
         return false
     end
 
+
     if(type(cls) ~= "table") then 
         return false
     end

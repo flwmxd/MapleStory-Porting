@@ -27,6 +27,7 @@ local GameObject = require("GameObject")
 local Tile = require("Tile")
 local Obj = require("Obj")
 local Npc = require("Npc")
+local Mob = require("Mob")
 local Portal = require("Portal")
 local Background = require("Background")
 
@@ -47,8 +48,8 @@ function MapleMap.getMapName(mapId)
             if k2 == name then
                 return v2["mapName"]:toString()
             end
-        end)
-    end)
+        end) 
+    end) or ""
 end
 
 function MapleMap:init()
@@ -58,7 +59,7 @@ function MapleMap:init()
     local src = WzFile.map["Map"]["Map"..prefix][id..".img"];
     local link = src["info"]["link"]
     
-    if linke ~= nil then
+    if #link.children > 0 then
         prefix = tonumber(link) / 100000000
         src = WzFile.map["Map"]["Map"..prefix][link:toString()..".img"];
     end
@@ -69,116 +70,108 @@ function MapleMap:init()
     self:loadNpc(src)
     self:loadPortals(src)
     self:addLayer(fg)
+    if self.spawnPoint ~= nil then
+    --    SceneManager.camera:setTarget(self.spawnPoint)
+    end
 end
 
 -- @param node -> wzNode
 function MapleMap:addTilesObjs(node)
     for i = 0, 7 do
         local src = node[i]
-        if src ~= nil then 
-            local ts = src["info"]["tS"]
-            if(ts ~= nil) then 
-                ts = ts:toString() .. ".img";
-                local layer = Layer.new(Vector.new(0,0),Vector.new(5000,5000))
-                local tls = wz.expand(src["tile"])
-                local objs = wz.expand(src["obj"])
-                layer.drag = false
-                layer.name = "MapTile"..i
+        local ts = src["info"]["tS"]:toString() 
+        if ts ~= ""  then 
+            log(ts)
+            ts = ts .. ".img"
+            local layer = Layer.new(Vector.new(0,0),Vector.new(5000,5000))
+            local tls = wz.expand(src["tile"])
+            local objs = wz.expand(src["obj"])
+            layer.drag = false
+            layer.name = "MapTile"..i
 
+            local mapObjs = GameObject.new()
 
+            if objs ~= nil then
+                objs:foreach(function(k,v)
+                    if v ~= nil then
+                        mapObjs:addChild(Obj.new(v))
+                    end
+                end)
+            end
 
+            table.sort(mapObjs.gameObjs, function (a,b)
+                if a.z == b.z then return a.zId < b.zId end
+                return a.z < b.z
+            end)
 
+            layer:addChild(mapObjs)
+
+            local mapTiles = GameObject.new()
+
+            if(tls ~= nil) then
                 
-                local mapObjs = GameObject.new()
-
-                if objs ~= nil then
-                    objs:foreach(function(k,v)
-                        if v ~= nil then
-                            mapObjs:addChild(Obj.new(v))
-                        end
-                    end)
-                end
-
-
-                table.sort(mapObjs.gameObjs, function (a,b)
-                    if a.z == b.z then return a.zId < b.zId end
-                    return a.z < b.z
+                local tsNode = WzFile.map["Tile"][ts]
+                tls:foreach(function(k,v) 
+                    local desNode = tsNode[v["u"]][v["no"]]
+                    if desNode ~= nil then
+                        mapTiles:addChild(Tile.new(v,desNode))
+                    end
                 end)
+            end
 
-                layer:addChild(mapObjs)
-
-
-
-                local mapTiles = GameObject.new()
-
-                if(tls ~= nil) then
-                   
-                    local tsNode = WzFile.map["Tile"][ts]
-                    tls:foreach(function(k,v) 
-                        local desNode = tsNode[v["u"]][v["no"]]
-                        if desNode ~= nil then
-                            mapTiles:addChild(Tile.new(v,desNode))
-                        end
-                    end)
-                end
-
-
-                table.sort(mapTiles.gameObjs, function (a,b)
-                    return a.z < b.z
-                end)
-
-
-                layer:addChild(mapTiles)
-
-
-                self:addChild(layer)
-
-            end 
-        end
+            table.sort(mapTiles.gameObjs, function (a,b)
+                return a.z < b.z
+            end)
+            layer:addChild(mapTiles)
+            self:addChild(layer)
+        end 
     end
 end
 
 function MapleMap:loadPortals(node)
     node["portal"]:foreach(function(k,v)
-        self:addChild(Portal.new(v))
+        local sp = self:addChild(Portal.new(v))
+        if sp:isSpawnPoint() then
+            self.spawnPoint = sp
+        end
     end)
 end
 
 function MapleMap:loadBackground(src)
     local no = 0
-	local back = src[no]
+    local back = src[no]
     local backSrc = WzFile.map["Back"]
     local layer = Layer.new(Vector.new(0,0),Vector.new(5000,5000))
     local foreground = Layer.new(Vector.new(0,0),Vector.new(5000,5000))
-  
+
     layer.name = "Backgrounds"
     foreground.name = "Foreground"
-
-    while back ~= nil do
+    while back:hasChildren() do
         local front = back["front"]:toBoolean()
         if front then
-        	foreground:addChild(Background.new(back, backSrc))
+            foreground:addChild(Background.new(back, backSrc))
         else
             layer:addChild(Background.new(back, backSrc))
         end
         no = no + 1
-		back = src[no]
+        back = src[no]
     end
-
     return layer,foreground
 end
 
 function MapleMap:loadNpc(node)
   
     node["life"]:foreach(function(k,v)
+        local id = v["id"]:toInt()
         if v["type"]:toString() == "m" then --mob
-                
+            self:addChild(Mob.new(id, Vector.new(v["x"]:toInt(),  v["y"]:toInt())))
         else
-            local id = v["id"]:toInt()
             self:addChild(Npc.new(id,v))
         end
     end)
 end
+
+
 
 
 return MapleMap

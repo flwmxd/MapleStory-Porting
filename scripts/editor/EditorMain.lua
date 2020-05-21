@@ -38,6 +38,10 @@ CurrentScene = nil
 
 function onStart()
 	ImEngine.onStart()
+	--local a = WzFile.ui["UIWindow.img"]
+	--local b = a["xxxx"]:toInt()
+	--local c =a["xxxx"]["dasdsad"]
+
 	CurrentScene = MapleMap.new(910000000)
 	SceneManager.addScene(CurrentScene)
 	--local scene = SceneManager.addScene(Scene.loadScene("./scene/SampleScene.scene"))
@@ -68,6 +72,10 @@ end
 -- else the engien(c++) will handle the event
 function onTouchEvent(x,y,touchId,type)
 	return Engine.onTouchEvent(x,y,touchId,type)
+end
+
+function onKeyEvent(keyCode,type)
+	return Engine.onKeyEvent(keyCode,type)
 end
 
 -- used in editor mode

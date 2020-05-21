@@ -18,71 +18,48 @@
 
 dofile("scripts/Tools/Class.lua")
 
-require ("WzFile")
-
-
 local TextView = require("TextView")
 local Vector = require("Vector")
-local Rect = require("Rect")
-local Sprite = require("Sprite")
 local GameObject = require("GameObject")
+local MobData = require("MobData")
+local Mob = class("Mob",GameObject)
 
-local Npc = class("Npc",GameObject)
-
-
-function Npc:ctor(id,node)
-    self.id = id
-    local strId = string.format("%07d.img",id)
-    self.footHold = node["fh"]:toInt()
-    local strSrc = WzFile.string["Npc.img"][id]
+function Mob:ctor(id,pos)
+    GameObject.ctor(self,pos)
+    local data = MobData.get(id)
     self.animations = {}
-    self.stances = {}
-    local src = WzFile.npc[strId]
-	local link = src["info"]["link"]
-	if (#link.children > 0) then
-        link = link:toString()..".img"
-		src = WzFile.npc[link]
+    for key, value in pairs(data.animations) do
+        self.animations[key] = Animation.new(value.rawPtr)
     end
-    self.stance = "stand"
-    local info = src["info"]
-    --[[self.dcRect = Rect.new(
-		info["dcLeft"]:toInt(),
-		info["dcRight"]:toInt(),
-		info["dcTop"]:toInt(),
-		info["dcBottom"]:toInt()
-    )]]
-    src:foreach(function(k,v)
-        if k ~= "info" then
-           self.animations[k] = Animation.new(v.rawPtr)
-           self.dimension = Vector.new(self.animations[k]:getWidth(),self.animations[k]:getHeight())
-           table.insert(self.stances,k)
-        end
-    end)
+    self.stance = MobData.MobStance.STAND
 
-    GameObject.ctor(self, Vector.new(node["x"]:toInt(),  node["y"]:toInt()),Vector.new(self.animations[self.stance]:getWidth(),self.animations[self.stance]:getHeight()))
-    self.origin = self.animations[self.stance]:getOrigin()
-    self.name = strSrc["name"]:toString()
-    self:addChild(TextView.new(Vector.new(0,0),Vector.new(0,0),text.CENTER,text.A12B,text.YELLOW,self.name)):setNameTag(true)
+    if self.animations[self.stance] ~= nil then 
+        self.origin = self.animations[self.stance]:getOrigin()
+        self.dimension = Vector.new(self.animations[self.stance]:getWidth(),self.animations[self.stance]:getHeight())
+    end
+
+    self.name = data.name
+    self:addChild(TextView.new(Vector.new(0,0),Vector.new(0,0),text.CENTER,text.A12M,text.YELLOW,"[Lv.".. data.level .. "]"..self.name)):setNameTag(true)
 end
 
-function Npc:getOrigin()
+function Mob:getOrigin()
     return self.animations[self.stance]:getOrigin()
 end
 
-function Npc:draw(camera)
+function Mob:draw(camera)
     GameObject.draw(self,camera)
     self.animations[self.stance]:draw(camera:getViewProjection())
 end
 
-function Npc:update(dt)
+function Mob:update(dt)
     GameObject.update(self,dt)
     self.animations[self.stance]:update(dt)
 end
 
-function Npc:setNativeTransform()
+function Mob:setNativeTransform()
     for k,v in pairs(self.animations) do
        v:updateTransform(self.transform)
     end
 end
 
-return Npc
+return Mob

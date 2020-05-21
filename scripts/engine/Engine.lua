@@ -43,10 +43,10 @@ function Engine.draw()
 end
 
 function Engine.update(dt)
-    if not system_editor_mode then
+    --if not system_editor_mode then
         Timer.update(dt)
         Scheduler.update(dt)
-    end
+    --end
     ImEngine.update(dt)
     SceneManager.update(dt)
     Engine.elasped = Engine.elasped + dt

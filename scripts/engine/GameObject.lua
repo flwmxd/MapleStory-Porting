@@ -44,7 +44,7 @@ function GameObject:ctor(pos,dimen)
     self.enable= true
     self.gameObj = nil
     self.active = true
-    
+    self.skipCamera = false
     self.transform = Transform.new()
     self.calculatedTransform = Matrix.identity()
     self.transformDirty = true
@@ -55,8 +55,12 @@ function GameObject:ctor(pos,dimen)
         [event.TOUCH_CLICK]    =  self.onPress,
         [event.TOUCH_RELEASE]  =  self.onRelease
     }
+
+
     self.bindScripts = {}
     
+
+    self.onKeyScript = ""
     self.moveScriptName = ""
     self.moveFunName = ""
 
@@ -219,7 +223,7 @@ function GameObject:visit(drawQueue,camera,parentTransform, parentDirty)
         self:calculateTransform()
     end
 
-    if self.active and camera:checkVisibility(self.transform,self.rect,self.origin) then
+    if self.active and (self.skipCamera or camera:checkVisibility(self.transform,self.rect,self.origin))then
         table.insert(drawQueue,self)
         self.visibile = true
     else
@@ -299,13 +303,13 @@ function GameObject:update(dt)
     end
 
 
-    if not system_editor_mode then
+    --if not system_editor_mode then
         if self.bindScripts ~= nil then
             for i,v in pairs(self.bindScripts) do
                 v:update(dt)
             end
         end
-    end
+    --end
 
 end
 
@@ -313,7 +317,7 @@ function GameObject:drawBox(camera)
     if self.highligted or self.showRect then 
         --local vp = camera:getViewProjection() * self.transform:getTransform()
         local origin = self:getOrigin()
-        render.drawRect(-origin.x,-origin.y,self.rect.width,self.rect.height,self.rectColor,camera:getViewProjection() * self.transform:getTransform())
+        render.drawRect(-origin.x,-origin.y,self.dimension.x,self.dimension.y,self.rectColor,camera:getViewProjection() * self.transform:getTransform())
         self.highligted = false
     end
 end
@@ -401,6 +405,26 @@ function GameObject:onTouchEvent(x,y,touchId,type)
 end
 
 function GameObject:onKeyEvent(keyCode,type)
+
+    for k,v in pairs(self.gameObjs) do
+        if v:onKeyEvent(keyCode,type) then
+            return true
+        end
+    end
+
+    if self.onKeyScript ~= "" and  self.onKeyScriptObject == nil then
+        local table = dofile(self.onKeyScript)
+        self.onKeyScriptObject = table.new()
+        self.onKeyScriptObject.name = table.__cname
+        self.onKeyScriptObject.gameObject = self
+        self.onKeyScriptObject:onLoaded()
+        self.bindScripts[table.__cname] = self.onKeyScriptObject
+    end
+
+    if self.onKeyScriptObject ~= nil then 
+        return self.onKeyScriptObject:onKeyEvent(keyCode,type)
+    end
+    
     return false
 end
 

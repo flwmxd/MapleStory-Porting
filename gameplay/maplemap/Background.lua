@@ -19,7 +19,9 @@
 dofile("scripts/Tools/Class.lua")
 
 require ("WzFile")
+require("Timer")
 
+local Moveable = require("Moveable")
 local Sprite = require("Sprite")
 local Vector = require("Vector")
 local Background = class("Background",Sprite)
@@ -32,43 +34,42 @@ Background.TILED = 3
 Background.HMOVEA = 4
 Background.VMOVEA = 5
 Background.HMOVEB = 6
-Background.VMOVE = 7
+Background.VMOVEB = 7
 
 -- remember, background sprite doesn't need to transform with it's parent node
 -- for some type of background elements can transform with camera, but for others there is no need to transform
 
 function Background:ctor(src, backNode)
     self.animated = src["ani"]:toBoolean();
-	self.opacity = src["a"]
+	self.opacity = src["a"]:toInt()
 	self.flipped = src["f"]:toBoolean();
 	self.cx = src["cx"]:toInt()
 	self.cy = src["cy"]:toInt()
 	self.rx = src["rx"]:toReal()
 	self.ry = src["ry"]:toReal()
 	self.type = src["type"]:toInt()
-
-
     local n = "ani"
-    if not self.animated then n = "back" end
-    Sprite.ctor(self,backNode[src["bS"] + ".img"][n][src["no"]:toString()],Vector.new(src["x"]:toInt(),src["y"]:toInt()))
+	if not self.animated then n = "back" end
+	Sprite.ctor(self,backNode[src["bS"] + ".img"][n][src["no"]:toString()],Vector.new(src["x"]:toInt(),src["y"]:toInt()))
 
+	self.skipCamera = true
+	self.moveObject = Moveable.new(0,0)
 	if self.flipped then
 		self:setScaleX(-1)
 	end
-	self.hspeed = 0
-	self.vspeed = 0
+	self.drawPos = Matrix.identity()
 	self:setType()
-	self.drawPos = Matrix.new()
 end
 
 
 
 function Background:setType()
 
-
 	local width = 800
 	local height = 600
 
+	self.moveV = false
+	self.moveH = false
 
 	if self.cx == 0 then
 		self.cx = math.max(self.dimension.x, 1)
@@ -76,30 +77,34 @@ function Background:setType()
 	if self.cy == 0 then
 		self.cy = math.max(self.dimension.y, 1)
 	end
+
 	self.htile = 1
 	self.vtile = 1
 
 	--Horizontal
 	if self.type == Background.HTILED or self.type == Background.HMOVEA then
-		self.htile = width / self.cx + 6
+		self.htile = width / self.cx + 5
 	end
 	--Verticle
 	if self.type == Background.VTILED or self.type == Background.VMOVEA then
-		self.vtile = height / self.cx + 6
+		self.vtile = height / self.cx + 5
 	end
 
 	if self.type == Background.TILED or self.type == Background.HMOVEB  or self.type == Background.VMOVEB then
-		self.htile = width / self.cx + 6;
-		self.vtile = height / self.cy + 6;
+		self.htile = width / self.cx + 5
+		self.vtile = height / self.cy + 5
 	end
 
-
 	if self.type  == Background.HMOVEA or self.type == Background.HMOVEB then 
-		self.hspeed = self.rx / 16
+		self.moveObject.hspeed = self.rx / 16
+		self.moveH = true
+		self.moveV = false
 	end
 
 	if self.type  == Background.VMOVEA or self.type == Background.VMOVEB then 
-		self.vspeed = self.ry / 16
+		self.moveObject.vspeed = self.ry / 16
+		self.moveV = true
+		self.moveH = false
 	end
 
 end	
@@ -107,74 +112,75 @@ end
 
 function Background:update(dt)
 	Sprite.update(self,dt)
-
-	if self.hspeed ~= 0 then
-		self.position.x = self.position.x + self.hspeed
-	else -- give a delta effect if the camera move
-		
-	end
-	
-	if self.vspeed ~= 0 then
-		self.position.y = self.position.y + self.vspeed
-
-	else
-
-	end
-
-	if self.htile > 1 then
-		while (self.position.x > 0) do
-			self.position.x = self.position.x - self.cx;
-		end
-		while (self.position.x < -self.cx) do
-			self.position.x = self.position.x + self.cx;
-		end
-	end
-
-	if (self.vtile > 1) then
-	
-		while (self.position.y > 0)  do
-			self.position.y = self.position.y - self.cy;
-		end
-		while (self.position.y < -self.cy)  do
-			self.position.y = self.position.y + self.cy;
-		end
-	end
-	
+	self.moveObject:move()
 end
 
 function Background:draw(camera)
 
-	local ix = math.modf(self.position.x)
-	local iy = math.modf(self.position.y)
+	local halfWidth = 400
+	local halfHeight = 300
 
-	local tw = self.cx * self.htile;
-	local th = self.cy * self.vtile; 
+	local view = camera:getInverseProjection():getTranslation()
+	local x = 0
+	local y = 0
+
+	if self.moveObject:isHorizontal() then
+		x = self.moveObject.x + view.x
+	else
+		x = self.moveObject.x + self.rx * (halfWidth - view.x) / 400 + view.x
+	end
+
+	if self.moveObject:isVertical() then
+		y = self.moveObject.y + view.y
+	else
+		y = self.moveObject.y - self.ry * (halfHeight - view.y) / 500 + view.y
+	end
+
+	-- makes it loop forever
+	if (self.htile > 1 and self.moveObject:isHorizontal() ) then
+	
+		while (x > 0) do
+			x = x - self.cx
+		end
+		
+		while (x < -self.cx) do
+			x = x + self.cx
+		end
+		
+	end
+
+	if (self.vtile > 1 and self.moveObject:isVertical())then
+		
+		while (y > 0) do
+			y = y - self.cy
+		end
+		
+		while (y < -self.cy) do
+			y = y + self.cy
+		end
+		
+	end
+
+	x = math.modf(x)
+	y = math.modf(y)
 
 	for tx = 0,self.htile - 1 do
 		for ty = 0,self.vtile - 1 do
-			self.drawPos:setTranslation(ix + tx * self.cx, iy + ty * self.cx,0)
+			if self.type == Background.TILED then 
+				self.drawPos:setTranslation(x + tx * self.cx - 400 , y + ty * self.cy - 300,0)
+			elseif self.type == Background.VTILED then
+				self.drawPos:setTranslation(0 , y + ty * self.cy - 1200,0) 
+			elseif self.type == Background.HTILED then
+				self.drawPos:setTranslation(x + tx * self.cx - 480,  y + ty * self.cy ,0)
+			else
+			 	self.drawPos:setTranslation(x + tx * self.cx, y + ty * self.cy,0)
+			end
+			
 			if self.animation ~= nil then
 				self.animation:draw(camera:getViewProjection() * self.drawPos)
 			end
 		end
 	end
-
-end
-
-function Background:setNativeTransform()
-    if self.animation ~= nil then
-       self.animation:updateTransform(self.transform)
-    end
-end
-
-function Background:calculateTransform()
-	self.transform:setTranslation(self.position.x,self.position.y,0)
-    self.transform:calculateLocalTransform()
-    self.transformDirty = false
-    self.updateChildrenTransform = true
-    --self.transform:calculateTransform()
-    --self.inverseTransform = self.transform:getInverseTranform()
-    self:setNativeTransform()
 end
 
 return Background

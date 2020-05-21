@@ -38,7 +38,7 @@ function SceneManager.addScene(scene)
     scene:onCreate()
     SceneManager.rootScene = scene
     scene:visit(SceneManager.drawQueue,SceneManager.camera,SceneManager.transform,true)
-    SceneManager.camera:setTarget(scene)
+    SceneManager.camera:setTarget(nil)
     return scene
 end
 
