@@ -96,7 +96,7 @@ Sprite is a 2d graphic object which can change its color, transform(scale rotati
 
 ## Scene
 
-Scene is also a container, which is responsibilty for managing the whole game business logic and others components like sprite and UI . you can create it by using editor and can be switch easily. 
+Scene is also a container, which is responsibility for managing the whole game business logic and others components like sprite and UI . you can create it by using editor and can be switch easily. 
 
 
 ## UI
