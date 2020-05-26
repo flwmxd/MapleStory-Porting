@@ -82,4 +82,14 @@ function Sprite:getTexture()
     return nil
 end
 
+function Sprite:setAnchroPoint(x,y)
+    if self.animation ~= nil then
+        return self.animation:setAnchroPoint(x,y)
+    end
+    self.origin.x = x
+    self.origin.y = y
+    self:updateBox()
+end
+
+
 return Sprite

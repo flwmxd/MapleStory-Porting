@@ -71,6 +71,11 @@ function TextView:init()
 	self.nativeText = NativeText.new(self.alignment or 0,self.textFont or 0,self.color or 0,self.txt or "")
 	self.dimension =  Vector.new(self.nativeText:getWidth(),self.nativeText:getHeight())
 	GameObject.init(self)
+	if self.alignment == text.CENTER then
+		self.origin = Vector.new(-self.dimension.x / 2,0)
+	elseif self.alignment == text.RIGHT then
+		self.origin = Vector.new(-self.dimension.x,0)
+	end
 end
 
 

@@ -77,6 +77,9 @@ function Camera:setPosition(x,y)
     self.x = x
     self.y = y
     self.projection:setOrthographic(-400+x,400+x,-300+y,300+y,1,-1)
+
+    --self.projection:setOrthographic(self.x,800+self.x,self.y,600+self.y,1,-1)
+
     self.viewProjectionDirty = true
     self.inverseDiry = true
 end
@@ -89,7 +92,8 @@ function Camera:setTarget(gameObj)
 end
 
 function Camera:recalculateProjection()
-    self.projection:setOrthographic(-400,400,-300,300,1,-1)
+   self.projection:setOrthographic(-400,400,-300,300,1,-1)
+   --self.projection:setOrthographic(0,800,0,600,1,-1)
 end
 
 function Camera:calculateViewProjection()

@@ -148,9 +148,10 @@ function MapleMap:loadBackground(src)
     foreground.name = "Foreground"
     while back:hasChildren() do
         local front = back["front"]:toBoolean()
+        local type = src["type"]:toInt()
         if front then
             foreground:addChild(Background.new(back, backSrc))
-        else
+        else 
             layer:addChild(Background.new(back, backSrc))
         end
         no = no + 1

@@ -223,7 +223,7 @@ function GameObject:visit(drawQueue,camera,parentTransform, parentDirty)
         self:calculateTransform()
     end
 
-    if self.active and (self.skipCamera or camera:checkVisibility(self.transform,self.rect,self.origin))then
+    if self.active and ( camera:checkVisibility(self.transform,self.rect,self.origin) or self.skipCamera ) then
         table.insert(drawQueue,self)
         self.visibile = true
     else

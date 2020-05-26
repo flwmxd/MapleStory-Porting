@@ -45,6 +45,18 @@ ImObjectEditor.mobStances = {
     ["SKILL_4"]= 26
 }
 
+ImObjectEditor.backgroundType = {
+   [0] = "NORMAL",
+   [1] = "HTILED", 
+   [2] = "VTILED",
+   [3] = "TILED ",  
+   [4] = "HMOVEA",
+   [5] = "VMOVEA",
+   [6] = "HMOVEB",
+   [7] = "VMOVEB",
+}
+
+
 function ImObjectEditor.draw()
 
     local obj = Engine.editorFocusedObject
@@ -74,6 +86,7 @@ function ImObjectEditor.draw()
             ImObjectEditor.drawSpritesAnimation(obj)
             ImObjectEditor.drawNpcAnimations(obj)
             ImObjectEditor.drawMobAnimations(obj)
+            ImObjectEditor.drawBackgroundType(obj)
             if imgui.Button("LookAt") then
                 SceneManager.camera:setTarget(obj)
             end
@@ -82,6 +95,8 @@ function ImObjectEditor.draw()
 	end
     imgui.End()
 end
+
+
 
 
 function ImObjectEditor.drawOrigin(obj)
@@ -440,7 +455,46 @@ function ImObjectEditor.drawListener(obj)
  
 end
 
+function ImObjectEditor.drawBackgroundType(obj)
+    if obj.__cname == "Background" then
 
+        
+        local ret,x,y
+        ret,x = imgui.DragFloat("cx",obj.cx,1,0,0,"%.0f");
+        ret,y = imgui.DragFloat("cy",obj.cy,1,0,0,"%.0f");
+        if x ~= obj.cx or y ~= obj.cy then
+            obj.cx = x
+            obj.cy = y
+        end
+        imgui.Separator()
+
+        ret,x = imgui.DragFloat("rx (velocity in x axis)",obj.rx,1,0,0,"%.0f");
+        ret,y = imgui.DragFloat("ry (velocity in y axis)",obj.ry,1,0,0,"%.0f");
+        if x ~= obj.rx or y ~= obj.ry then
+            obj.rx = x
+            obj.ry = y
+        end
+        imgui.Separator()
+
+
+        ret,x = imgui.DragFloat("htile",obj.htile,1,0,0,"%.0f");
+        ret,y = imgui.DragFloat("vtile",obj.vtile,1,0,0,"%.0f");
+        if x ~= obj.htile or y ~= obj.vtile then
+            obj.htile = x
+            obj.vtile = y
+        end
+        imgui.Separator()
+
+        if imgui.BeginCombo("BackType",ImObjectEditor.backgroundType[obj.type or 0]) then
+            for key, value in pairs(ImObjectEditor.backgroundType) do
+                if imgui.Selectable("Type_"..value) then  
+                    obj.type = key
+                end
+            end
+            imgui.EndCombo()
+        end
+    end
+end
 
 
 function ImObjectEditor.update(dt)

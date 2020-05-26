@@ -17,51 +17,22 @@
 ------------------------------------------------------------------------------
 
 dofile("scripts/Tools/Class.lua")
+require ("WzFile")
 
-local Moveable = class("Moveable")
+local Vector = require("Vector")
+local Sprite = require("Sprite")
+local GameObject = require("GameObject")
+local MapleTV = class("MapleTV",GameObject)
 
-function Moveable:ctor(x,y)
-    self.x = x
-    self.y = y
-    self.hspeed = 0
-    self.vspeed = 0
+function MapleTV:ctor(infoNode)
+    GameObject.ctor(self)
+	local tv = WzFile.ui["MapleTV.img"]
+	local adAnim = Sprite.new(tv["TVon"], Vector.new(infoNode["MapleTVmsgX"]:toInt(),infoNode["MapleTVmsgY"]:toInt()))
+    local mediaAnim = Sprite.new(tv["TVmedia"]["0"],Vector.new(infoNode["MapleTVadX"]:toInt(),infoNode["MapleTVadY"]:toInt()))
+	mediaAnim:setAnchroPoint(0, 0);
+    adAnim:setAnchroPoint(0, 0);
+    self:addChild(adAnim)
+    self:addChild(mediaAnim)
 end
 
-function Moveable:setX(x)
-    self.x = x
-end
-
-function Moveable:setY(y)
-    self.y = y
-end
-
-function Moveable:move(dt)
-    self.x = self.x + self.hspeed * dt
-    self.y = self.y + self.vspeed * dt
-end
-
-function Moveable:nextX()
-    return self.x + self.hspeed
-end
-
-function Moveable:nextY()
-    return self.y + self.vspeed
-end
-
-function Moveable:isHorizontal()
-    return self.hspeed ~= 0.0
-end
-
-function Moveable:isVertical()
-    return self.vspeed ~= 0.0
-end
-
-function Moveable:getAbsoluteX(viewX) 
-    return self.x + viewX
-end
-
-function Moveable:getAbsoluteY(viewY) 
-    return self.y + viewY
-end
-
-return Moveable
+return MapleTV

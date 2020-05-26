@@ -1,3 +1,4 @@
+
 ------------------------------------------------------------------------------
 -- This file is part of the PharaohStroy MMORPG client                      --
 -- Copyright ?2020-2022 Prime Zeng                                          --
@@ -16,52 +17,10 @@
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.    --
 ------------------------------------------------------------------------------
 
-dofile("scripts/Tools/Class.lua")
+MathUtils = {}
 
-local Moveable = class("Moveable")
-
-function Moveable:ctor(x,y)
-    self.x = x
-    self.y = y
-    self.hspeed = 0
-    self.vspeed = 0
+function MathUtils.lerp(v0,v1,t)
+    return (1 - t) * v0 + t * v1
 end
 
-function Moveable:setX(x)
-    self.x = x
-end
-
-function Moveable:setY(y)
-    self.y = y
-end
-
-function Moveable:move(dt)
-    self.x = self.x + self.hspeed * dt
-    self.y = self.y + self.vspeed * dt
-end
-
-function Moveable:nextX()
-    return self.x + self.hspeed
-end
-
-function Moveable:nextY()
-    return self.y + self.vspeed
-end
-
-function Moveable:isHorizontal()
-    return self.hspeed ~= 0.0
-end
-
-function Moveable:isVertical()
-    return self.vspeed ~= 0.0
-end
-
-function Moveable:getAbsoluteX(viewX) 
-    return self.x + viewX
-end
-
-function Moveable:getAbsoluteY(viewY) 
-    return self.y + viewY
-end
-
-return Moveable
+return MathUtils

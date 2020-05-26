@@ -1,3 +1,4 @@
+
 ------------------------------------------------------------------------------
 -- This file is part of the PharaohStroy MMORPG client                      --
 -- Copyright ?2020-2022 Prime Zeng                                          --
@@ -18,50 +19,34 @@
 
 dofile("scripts/Tools/Class.lua")
 
-local Moveable = class("Moveable")
+local LuaScript = require ("LuaScript")
 
-function Moveable:ctor(x,y)
-    self.x = x
-    self.y = y
-    self.hspeed = 0
-    self.vspeed = 0
+local KeyController = class("KeyController",LuaScript)
+
+function KeyController:onLoaded()
+    self.key = {}
+    log(" KeyController:onLoaded() ")
 end
 
-function Moveable:setX(x)
-    self.x = x
+function KeyController:update(dt)
+    
+    if self.key[event.KEY_LEFT_DPAD] then 
+        self.gameObject.position.x = self.gameObject.position.x - 16
+        self.gameObject:setPosition(self.gameObject.position)
+    elseif self.key[event.KEY_RIGHT_DPAD] then 
+        self.gameObject.position.x = self.gameObject.position.x + 16
+        self.gameObject:setPosition(self.gameObject.position)
+    end
 end
 
-function Moveable:setY(y)
-    self.y = y
+function KeyController:onKeyEvent(keyCode,type)
+    log(keyCode)
+    if type == event.KEY_DOWN  then
+        self.key[keyCode] = true
+    elseif type == event.KEY_RELEASE then
+        self.key[keyCode] = false
+    end
+    return true
 end
 
-function Moveable:move(dt)
-    self.x = self.x + self.hspeed * dt
-    self.y = self.y + self.vspeed * dt
-end
-
-function Moveable:nextX()
-    return self.x + self.hspeed
-end
-
-function Moveable:nextY()
-    return self.y + self.vspeed
-end
-
-function Moveable:isHorizontal()
-    return self.hspeed ~= 0.0
-end
-
-function Moveable:isVertical()
-    return self.vspeed ~= 0.0
-end
-
-function Moveable:getAbsoluteX(viewX) 
-    return self.x + viewX
-end
-
-function Moveable:getAbsoluteY(viewY) 
-    return self.y + viewY
-end
-
-return Moveable
+return KeyController

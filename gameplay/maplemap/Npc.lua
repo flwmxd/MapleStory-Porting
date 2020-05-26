@@ -25,6 +25,7 @@ local TextView = require("TextView")
 local Vector = require("Vector")
 local Rect = require("Rect")
 local Sprite = require("Sprite")
+local MapleTV = require("MapleTV")
 local GameObject = require("GameObject")
 
 local Npc = class("Npc",GameObject)
@@ -51,6 +52,7 @@ function Npc:ctor(id,node)
 		info["dcTop"]:toInt(),
 		info["dcBottom"]:toInt()
     )]]
+
     src:foreach(function(k,v)
         if k ~= "info" then
            self.animations[k] = Animation.new(v.rawPtr)
@@ -61,8 +63,18 @@ function Npc:ctor(id,node)
 
     GameObject.ctor(self, Vector.new(node["x"]:toInt(),  node["y"]:toInt()),Vector.new(self.animations[self.stance]:getWidth(),self.animations[self.stance]:getHeight()))
     self.origin = self.animations[self.stance]:getOrigin()
-    self.name = strSrc["name"]:toString()
-    self:addChild(TextView.new(Vector.new(0,0),Vector.new(0,0),text.CENTER,text.A12B,text.YELLOW,self.name)):setNameTag(true)
+    
+    self.tv = info["MapleTV"]:toBoolean()
+    self.hideName = info["hideName"]:toBoolean()
+    if self.tv then
+        self:addChild(MapleTV.new(info))
+    end
+    
+    if not self.hideName then 
+        self.name = strSrc["name"]:toString()
+        self:addChild(TextView.new(Vector.new(0,0),Vector.new(0,0),text.CENTER,text.A12B,text.YELLOW,self.name)):setNameTag(true)
+    end
+
 end
 
 function Npc:getOrigin()
@@ -70,8 +82,8 @@ function Npc:getOrigin()
 end
 
 function Npc:draw(camera)
-    GameObject.draw(self,camera)
     self.animations[self.stance]:draw(camera:getViewProjection())
+    GameObject.draw(self,camera)
 end
 
 function Npc:update(dt)
