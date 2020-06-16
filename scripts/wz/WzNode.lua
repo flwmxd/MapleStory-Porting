@@ -17,6 +17,7 @@
 ------------------------------------------------------------------------------
 
 local WzNode = {}
+local Vector = require("Vector")
 
 WzNode.__index = function(table, key) 
     
@@ -80,8 +81,26 @@ function WzNode:toBoolean(default)
     return wz.toBoolean(self.rawPtr,default or false)
 end
 
+function WzNode:isUOL()
+    return wz.isUOL(self.rawPtr)
+end
+
+function WzNode:isVector()
+    return wz.isVector(self.rawPtr)
+end
+
+
+function WzNode:resolvePath()
+    self.children = wz.resolvePath(self.rawPtr)
+    return self
+end
+
 function WzNode:toVector()
-    return wz.toVector(self.rawPtr)
+    if self:isVector() then
+        local v = wz.toVector(self.rawPtr)
+        return Vector.new(v.x,v.y)
+    end
+    return Vector.new(0,0)
 end
 
 function WzNode:hasChildren()
@@ -89,6 +108,10 @@ function WzNode:hasChildren()
         return true
     end
     return false
+end
+
+function WzNode:lookup(name)
+    return wz.lookup(self.rawPtr,name)
 end
 
 function WzNode:foreach(callback)

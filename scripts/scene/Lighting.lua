@@ -1,4 +1,3 @@
-
 ------------------------------------------------------------------------------
 -- This file is part of the PharaohStroy MMORPG client                      --
 -- Copyright ?2020-2022 Prime Zeng                                          --
@@ -19,16 +18,12 @@
 
 dofile("scripts/Tools/Class.lua")
 
-local LuaScript = require ("LuaScript")
-local Engine = require ("Engine")
+local Vector = require("Vector")
+local GameObject = require("GameObject")
+local Lighting = class("Lighting",GameObject)
 
-local FpsCalculator = class("FpsCalculator",LuaScript)
+function Lighting:ctor()
 
-function FpsCalculator:onLoaded()
 end
 
-function FpsCalculator:update(dt)
-    self.gameObject:changeText(Engine.FPS)
-end
-
-return FpsCalculator
+return Lighting

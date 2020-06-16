@@ -33,6 +33,7 @@ local Sprite = require "Sprite"
 --the entry function called by C++ 
 function onStart()
 	--SceneManager.addScene(Scene.loadScene("./scene/SampleScene.scene"))
+	Engine.onStart()
 	SceneManager.addScene(MapleMap.new(910000000))
 end
 

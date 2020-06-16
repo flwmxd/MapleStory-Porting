@@ -20,6 +20,8 @@
 require "Scheduler" 
 require "SceneManager"
 require "Timer"
+require "PartsInfo"
+
 -- single instance of current Game
 Engine = {
     focusedGameObject = nil,
@@ -28,6 +30,11 @@ Engine = {
     frames = 0,
     FPS = 0
 }
+
+
+function Engine.onStart()
+    PartsInfo.load()
+end
 
 function Engine.draw()
     ImEngine.draw()

@@ -30,33 +30,18 @@ local Vector = require "Vector"
 local Scene = require "Scene"
 local GameObject = require "GameObject"
 local MapleMap = require "MapleMap"
-
+local CharLook = require "CharLook"
 local Sprite = require "Sprite"
 --the entry function called by C++ 
 
 CurrentScene = nil
 
 function onStart()
+	Engine.onStart()
 	ImEngine.onStart()
-	--local a = WzFile.ui["UIWindow.img"]
-	--local b = a["xxxx"]:toInt()
-	--local c =a["xxxx"]["dasdsad"]
-
 	CurrentScene = MapleMap.new(910000000)
 	SceneManager.addScene(CurrentScene)
-	--local scene = SceneManager.addScene(Scene.loadScene("./scene/SampleScene.scene"))
-	
-	--for i = 1, 200 do
-		--	scene:addChild(GameObject.new())
-	--end
-	--SceneManager.addScene(MapleMap.new(910000000))
-	--local scene = SceneManager.addScene(Scene.loadScene("./scene/SampleScene.scene"))
-	--while true do
-	--	Engine.update(maple.pollEvent())
-	--	Engine.draw()
-	--	maple.present()
-	--end
-
+	CurrentScene:addChild(CharLook.new(false,1,30000,20000))
 end
 
 --it deponds on your device

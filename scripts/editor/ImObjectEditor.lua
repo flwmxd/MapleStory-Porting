@@ -17,6 +17,8 @@
 ------------------------------------------------------------------------------
 
 require ("Engine")
+require ("Stance")
+local Hair = require ("Hair")
 local Vector = require ("Vector")
 local Portal = require ("Portal")
 
@@ -68,6 +70,8 @@ function ImObjectEditor.draw()
             imgui.Separator()
             imgui.Text("Position")
             
+
+
             ImObjectEditor.drawPosition(obj)
             ImObjectEditor.drawOrigin(obj)
             ImObjectEditor.drawTextProperties(obj) 
@@ -87,9 +91,12 @@ function ImObjectEditor.draw()
             ImObjectEditor.drawNpcAnimations(obj)
             ImObjectEditor.drawMobAnimations(obj)
             ImObjectEditor.drawBackgroundType(obj)
+         
             if imgui.Button("LookAt") then
                 SceneManager.camera:setTarget(obj)
             end
+
+            ImObjectEditor.drawCharLook(obj)
             --ImObjectEditor.drawChildren(obj)
         end  
 	end
@@ -489,6 +496,40 @@ function ImObjectEditor.drawBackgroundType(obj)
             for key, value in pairs(ImObjectEditor.backgroundType) do
                 if imgui.Selectable("Type_"..value) then  
                     obj.type = key
+                end
+            end
+            imgui.EndCombo()
+        end
+    end
+end
+
+
+function ImObjectEditor.drawCharLook(obj)
+    if obj.__cname == "CharLook" then
+
+        imgui.Separator()
+
+        imgui.Text("CharLook Properties")
+
+        if imgui.BeginCombo("Stance",Stance[obj.stance]) then
+            for index, value in ipairs(Stance.Names) do
+                if value ~= "" then 
+                    if imgui.Selectable(value) then  
+                        obj.stance = index - 1
+                    end
+                end
+            end
+            imgui.EndCombo()
+        end
+
+       
+
+        if imgui.BeginCombo("Hair Style",Hair.loadData(obj.hairId)) then
+            for index, value in pairs(Hair.Cache) do
+                if index ~= "" then 
+                    if imgui.Selectable(index) then  
+                        obj:setHair(value)
+                    end
                 end
             end
             imgui.EndCombo()

@@ -29,10 +29,22 @@ function Vector.new(x,y)
 end
 
 function Vector.add(a,b)
+	if a == nil then 
+		a = Vector.new(0,0)
+	end
+	if b == nil then 
+		b = Vector.new(0,0)
+	end
 	return Vector.new(a.x + b.x , a.y + b.y)
 end
 
 function Vector.sub(a,b)
+	if a == nil then 
+		a = Vector.new(0,0)
+	end
+	if b == nil then 
+		b = Vector.new(0,0)
+	end
 	return Vector.new(a.x - b.x , a.y - b.y)
 end
 

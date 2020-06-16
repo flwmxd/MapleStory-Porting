@@ -190,10 +190,6 @@ function ImHierarchy.listSubItems(parent,subNode)
 		end 
 		imgui.PushID(v.uuid)
 
-		if imgui.IsItemHovered() then
-			v:highlight()
-		end
-
 		if #v.gameObjs > 0 then
 			if imgui.TreeNode(nodeName) then
 				ImHierarchy.focusItem(v)
@@ -214,6 +210,10 @@ function ImHierarchy.listSubItems(parent,subNode)
 			
 			ImHierarchy.gameObjectClick(parent,v,nodeName)
 			ImHierarchy.dragReorder(v,false)
+		end
+
+		if imgui.IsItemHovered() then
+			v:highlight()
 		end
 
 		imgui.PopID()

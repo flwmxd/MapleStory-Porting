@@ -36,8 +36,8 @@ function Moveable:setY(y)
 end
 
 function Moveable:move(dt)
-    self.x = self.x + self.hspeed * dt
-    self.y = self.y + self.vspeed * dt
+    self.x = self.x + self.hspeed * dt * 2
+    self.y = self.y + self.vspeed * dt * 2
 end
 
 function Moveable:nextX()
