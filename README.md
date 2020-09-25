@@ -11,8 +11,8 @@ The business logic are written by lua.
 | ----|------|
 [![Build status](https://img.shields.io/badge/build-pass-green.svg)]()|[![Build Status](https://img.shields.io/badge/porting-fail-red.svg)]()
 
-![image](https://raw.githubusercontent.com/flwmxd/PharaohStroy/master/img/map.png)
 
+<img src="img/map.png">
 
 # Usage 
 
@@ -20,13 +20,12 @@ The editor contains a MapleStory-FileSystem-Browser, so you can use it find a re
 
 
 
-![image](https://raw.githubusercontent.com/flwmxd/PharaohStroy/master/img/add-sprite.gif)
-
+<img src="img/add-sprite.gif">
 
 Beside, it support script-binding like Unity. so you can drag your own script to some specific GameObject 
 
-![image](https://raw.githubusercontent.com/flwmxd/PharaohStroy/master/img/drag-script.gif)
 
+<img src="img/drag-script.gif">
 ### Others
 
 if you want to add your own function,please read more NativeAPI for lua under the document.
@@ -66,19 +65,17 @@ this engine include two parts, one is the lua which is used to write core busine
 
 in the native framework, it support the basic engine function such as Audio,Graphics,etc
 
-![image](https://raw.githubusercontent.com/flwmxd/PharaohStroy/master/img/Architecture.png)
+<img src="img/Architecture.png">
 
 ## Engine Architecture 
 
 in lua framework, it include all upper engine components (GameObject,Scene,Sprite,Other UI components)
 
-
-![image](https://raw.githubusercontent.com/flwmxd/PharaohStroy/master/img/lua-framework.png)
+<img src="img/lua-framework.png">
 
 ## Processing Graph
 
-![image](https://raw.githubusercontent.com/flwmxd/PharaohStroy/master/img/processing.png)
-
+<img src="img/processing.png">
 
 # Some Concepts
 
@@ -91,8 +88,7 @@ GameObject is a container and basic updatable, drawable, transformable, eventabl
 ## Sprite
 Sprite is a 2d graphic object which can change its color, transform(scale rotation postion,etc)
 
-![image](https://raw.githubusercontent.com/flwmxd/PharaohStroy/master/img/sprite.png)
-
+<img src="img/sprite.png">
 
 ## Scene
 
@@ -107,8 +103,7 @@ The **Button** implements the original maplestory button logic, so you can add b
 
 The **TextView** implements the maplestory **Rich-Text** in native.
 
-![image](https://raw.githubusercontent.com/flwmxd/PharaohStroy/master/img/text.gif)
-
+<img src="img/text.gif">
 
 
 # Roadmap
